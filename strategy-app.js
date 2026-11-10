@@ -658,6 +658,7 @@ function renderNextHero(goal, plan, completed, recs) {
 }
 
 function renderAll() {
+  applyPlayView();
   const focused = document.activeElement;
   const focusKey = focused?.dataset?.action && [focused.dataset.action, focused.dataset.value];
   const focusId = focused?.id;
@@ -773,6 +774,7 @@ document.addEventListener('click', async event => {
     state.damageScenario=scenario;commitDamage();return;
   }
   if (action === 'strategy-detail') { openStrategyDetail(value); return; }
+  if (action === 'play-view') { setPlayView(value); return; }
   if(action==='offer-clear'){offerChoices=['','',''];renderOfferComparison();queueBuildOutlooks();return;}
   if(action==='offer-select'){
     if(!value || state.selected.has(value)){toast('此選項已取得或已更新，請重新比較。','warn');return;}

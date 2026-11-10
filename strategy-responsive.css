@@ -625,11 +625,21 @@ button, summary, [id] { scroll-margin-top: 100px; }
 .outlook-detail h4 { margin:0 0 8px; }
 .outlook-detail small { display:block; color:var(--muted); margin-top:6px; }
 .board-hint { margin:0 0 12px; color:var(--muted); font-size:.8rem; line-height:1.6; }
-.play-jumps { display:flex; gap:8px; margin:12px 0; }
+.play-jumps { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin:12px 0; }
+.view-switch { display:flex; gap:4px; padding:3px; border:1px solid var(--line); background:var(--panel); }
+.view-switch .btn[aria-pressed="true"] { background:var(--accent); color:var(--action-content, #fff); border-color:var(--accent); }
+body[data-play-view="compact"] #charDetail, body[data-play-view="compact"] #buildBoard,
+body[data-play-view="compact"] .board-caption, body[data-play-view="compact"] .board-hint,
+body[data-play-view="compact"] .board-tools, body[data-play-view="compact"] #damage-panel { display:none; }
 .offer-panel { padding:12px; border:1px solid var(--line); margin-bottom:16px; background:var(--panel); }
 .offer-panel p { color:var(--muted); font-size:.85rem; line-height:1.6; }
+.offer-advice { padding:10px 12px; border-left:3px solid var(--accent); background:var(--panel-2); line-height:1.6; }
+.offer-advice strong, .offer-advice span { display:block; }
 .offer-comparison { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:12px 0; }
 .offer-card { padding:12px; border:1px solid var(--line); gap:10px; min-width:0; }
+.offer-card.recommended { border-color:var(--accent-2); }
+.offer-card .offer-decision { color:var(--text); }
+.offer-decision strong { color:var(--accent-2); }
 .offer-card select { width:100%; max-width:100%; background:var(--panel-2); }
 .offer-pick { height:auto; min-height:64px; display:flex; flex-direction:column; white-space:normal; }
 .offer-card .node-outlook { height:auto; white-space:normal; flex-wrap:wrap; }
