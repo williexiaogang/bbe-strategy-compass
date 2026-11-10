@@ -59,10 +59,8 @@ function queueBuildOutlooks() {
   const status = document.getElementById('buildOutlookStatus');
   const paint = (name, result) => {
     for (const el of badges.filter(el => el.dataset.outlookName === name)) {
-      el.textContent = result?.count ? `${result.truncated ? '已找到' : '可規劃'} ${result.count} 紅 · 差 ${result.steps.length}` : '未找到路線';
-      if (result?.truncated) {
-        const hint = document.createElement('span'); hint.className = 'outlook-incomplete'; hint.textContent = '未搜完'; el.appendChild(hint);
-      }
+      el.textContent = result?.count ? `${result.count} 紅 · 差 ${result.steps.length}${result.truncated ? ' *' : ''}` : '未找到路線';
+      el.title = result?.truncated ? '已找到此方案，但本次搜尋未窮盡' : '';
       el.dataset.outlookCount = result?.count || 0;
       el.setAttribute('aria-busy', 'false');
       el.closest('button').title = result?.count

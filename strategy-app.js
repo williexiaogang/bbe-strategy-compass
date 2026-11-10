@@ -499,7 +499,7 @@ function renderBuildBoard(recs) {
             title="${esc(chosen ? '點擊取消' : lock || '選擇策略')}">
             <span class="node-tier">${TIER_LABEL[level]}</span>
             <span class="node-text"><span class="node-name">${esc(name)}</span>${lock ? `<span class="node-lock">${esc(lock)}</span>` : !chosen ? `<span class="badge badge-sm badge-outline node-outlook" data-outlook-name="${esc(name)}" aria-busy="true">試算中…</span>` : ''}</span>
-            <span class="verdict">${chosen ? '✓' : lock ? icon('lock') : rec ? '推薦' : ''}</span></button><button type="button" class="btn strategy-info" data-action="strategy-detail" data-value="${esc(name)}" aria-label="查看${esc(name)}詳情">詳情</button></div>`;
+            <span class="verdict">${chosen ? '✓' : lock ? icon('lock') : rec ? '推薦' : ''}</span></button><button type="button" class="strategy-info" data-action="strategy-detail" data-value="${esc(name)}" aria-label="查看${esc(name)}詳情" title="查看${esc(name)}詳情">ⓘ</button></div>`;
         }).join('')}</div></div>`;
       }).join('')}</div>`;
     }).join('');

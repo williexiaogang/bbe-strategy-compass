@@ -15,7 +15,7 @@ summary { align-content:center; cursor:pointer; }
 }
 .build-node.card-node .node-name, .card p, .ntext, .nsub, .hrow2,
 .legacy-row p, .notice { font-size:.9375rem; line-height:1.7; }
-.strategy-info.btn, .summary-actions .btn, .next-moves .btn,
+.strategy-info, .summary-actions .btn, .next-moves .btn,
 .dual-actions .btn, .inh-card button, .inh-slot, .bjump,
 .toolbar .btn, .searchwrap input, .sres { font-size:.875rem; }
 .inh-card .inh-status { font-size:.875rem !important; }
