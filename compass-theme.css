@@ -1,0 +1,33 @@
+/* Shared visual language for the strategy compass and character skill trees. */
+body {
+  background:
+    radial-gradient(90% 60% at 85% -10%, rgba(255,107,53,.13), transparent 60%),
+    radial-gradient(70% 50% at -10% 30%, rgba(77,210,255,.06), transparent 60%),
+    repeating-linear-gradient(135deg, rgba(255,255,255,.018) 0 1px, transparent 1px 22px),
+    var(--bg);
+  background-attachment: fixed;
+}
+header {
+  background: linear-gradient(90deg, rgba(20,22,29,.92), rgba(31,34,45,.88)) !important;
+  backdrop-filter: blur(8px); border-bottom: 1px solid rgba(255,107,53,.35) !important;
+  box-shadow: 0 6px 20px rgba(0,0,0,.35);
+}
+header::after {
+  content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+  background: linear-gradient(90deg, var(--accent) 0 18%, transparent 18% 20%, var(--accent-2) 20% 24%, transparent 24%);
+}
+header h1 .page-brand { letter-spacing: .06em; }
+header h1 .page-title {
+  font-weight: 900; font-style: normal; letter-spacing: .08em;
+  text-shadow: 0 0 14px rgba(255,107,53,.5);
+}
+header h1 .tag { clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); border-radius: 0 !important; padding: 2px 12px !important; }
+
+header h1 .page-title { color: var(--accent); }
+header h1 .tag { background: var(--dual); color: white; font-weight: 800; }
+header .navlink { display: inline-flex; align-items: center; gap: 5px; font-size: .72rem; font-weight: 400;
+  color: var(--ice); border: 1px solid var(--line); padding: 3px 10px; border-radius: 999px; text-decoration: none; white-space: nowrap; }
+header .navlink:hover { border-color: var(--ice); background: color-mix(in srgb, var(--ice) 8%, transparent); }
+button:focus-visible, a:focus-visible, input:focus-visible, summary:focus-visible {
+  outline: 3px solid var(--accent); outline-offset: 3px;
+}

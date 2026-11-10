@@ -1,0 +1,22 @@
+/* One original atlas for all tactic trees. Toolbar and tier symbols remain functional glyphs. */
+.tactic-art { display:inline-block; flex:0 0 auto; width:32px; height:32px; background-image:url('assets/strategy-icons/tactics-atlas-cartoon-v2.png'); background-size:540.8163265306% 757.1428571429%; background-repeat:no-repeat; vertical-align:middle; }
+.tactic-art-pair { display:inline-flex; align-items:center; gap:2px; }
+.tactic-art-pair .tactic-art { width:24px; height:24px; }
+.red-fusion { width:124px; height:76px; }
+.fusion-part { width:42px; height:42px; top:17px; left:16px; transform:none; border:0; border-radius:50%; background:none; }
+.fusion-part.source-ready { background:none; border:0; box-shadow:none; }
+.fusion-part:nth-child(2) { left:66px; }
+.fusion-joint { top:30px; left:54px; }
+.fusion-part .tactic-art { width:48px; height:48px; filter:drop-shadow(0 1px 2px rgba(0,0,0,.35)); }
+.fusion-part > .red-element { transform:none; opacity:.7; }
+.fusion-part.source-ready > .red-element { opacity:1; }
+.tree-ico .tactic-art { width:30px; height:30px; }
+.ls-icon > .tactic-art { transform:rotate(-45deg); width:34px; height:34px; }
+.loadout-slot.filled .ls-icon { transform:none; border:0; background:none; border-radius:50%; }
+.loadout-slot.filled .ls-icon > .tactic-art { transform:none; }
+.build-card .s-chip .tactic-art { width:22px; height:22px; }
+.build-element .tactic-art,.el-chip .tactic-art { width:24px; height:24px; }
+.tip-head > .tactic-art { width:36px; height:36px; }
+.inh-ico .tactic-art-pair { transform:rotate(-45deg); gap:0; }
+.inh-ico .tactic-art { width:18px; height:18px; }
+.pick-head .tactic-art-pair { flex:0 0 auto; }

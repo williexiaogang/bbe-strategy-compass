@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0b0c10">
+<title>蒼翼混沌效應 · 角色技能樹</title>
+<link rel="stylesheet" href="vendor/daisyui.css">
+<script src="vendor/tailwind-browser.js"></script>
+<style>
+  :root {
+    --bg: #0b0c10;
+    --panel: #15171f;
+    --panel-2: #1e212b;
+    --panel-3: #252836;
+    --text: #e8e9ec;
+    --muted: #9aa0af;
+    --accent: #ff6b35;
+    --accent-2: #f7c548;
+    --fire: #ff4d4d;
+    --ice: #4dd2ff;
+    --elec: #a78bfa;
+    --poison: #4ade80;
+    --dark: #94a3b8;
+    --light: #fde047;
+    --blade: #f97316;
+    --dual: #ef4444;
+    --line: #3f4452;
+    --radius: 14px;
+    --safe-b: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+    padding-bottom: calc(40px + var(--safe-b));
+  }
+  a { color: var(--ice); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ---------- header ---------- */
+  header {
+    background: linear-gradient(90deg, #14161d 0%, #1f222d 100%);
+    padding: 16px 20px 14px;
+    border-bottom: 1px solid #2a2d38;
+    position: sticky; top: 0; z-index: 60;
+  }
+  .hrow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  header h1 { margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 9px; flex: 1 1 auto; }
+  header h1 .hl { color: var(--accent); }
+  header h1 .tag {
+    font-size: .62rem; background: #6366f1; color: #fff;
+    padding: 2px 8px; border-radius: 999px; font-weight: 700; letter-spacing: .3px;
+  }
+  .navlink {
+    font-size: .78rem; color: var(--muted); border: 1px solid var(--line);
+    padding: 6px 11px; border-radius: 999px; white-space: nowrap;
+  }
+  .navlink:hover { color: var(--text); border-color: var(--accent); text-decoration: none; }
+  header p.sub { margin: 7px 0 0; color: var(--muted); font-size: .8rem; }
+
+  /* ---------- toolbar ---------- */
+  .toolbar {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    padding: 12px 20px; background: var(--panel); border-bottom: 1px solid #23262f;
+    position: sticky; top: 78px; z-index: 55;
+  }
+  .searchwrap { position: relative; flex: 1 1 260px; min-width: 180px; }
+  .searchwrap input {
+    width: 100%; padding: 10px 12px 10px 34px; border-radius: 10px;
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--text);
+    font-size: .88rem; font-family: inherit;
+  }
+  .searchwrap input:focus { outline: none; border-color: var(--accent); }
+  .searchwrap .ic { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: .85rem; }
+  .btn {
+    padding: 9px 13px; border-radius: 10px; background: var(--panel-2);
+    border: 1px solid var(--line); color: var(--text); font-size: .8rem;
+    cursor: pointer; font-family: inherit; white-space: nowrap;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ---------- character chips ---------- */
+  .charbar { padding: 12px 20px 4px; }
+  .chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: thin; }
+  .chips::-webkit-scrollbar { height: 6px; }
+  .chips::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+  .chip {
+    display: flex; align-items: center; gap: 7px; flex: 0 0 auto;
+    padding: 8px 12px; border-radius: 999px; background: var(--panel-2);
+    border: 1px solid var(--line); color: var(--text); cursor: pointer;
+    font-size: .83rem; font-family: inherit;
+  }
+  .chip:hover { border-color: var(--accent); }
+  .chip.active { background: linear-gradient(90deg, #ff6b3522, #f7c54822); border-color: var(--accent); color: #fff; }
+  .chip .tier { font-size: .62rem; font-weight: 800; padding: 1px 5px; border-radius: 5px; }
+  .t-s { background: #f7c548; color: #241a00; }
+  .t-a { background: #6ee7b7; color: #06281d; }
+  .t-b { background: #94a3b8; color: #101319; }
+  .chip .nodata { color: #6b7280; font-size: .72rem; }
+
+  /* ---------- layout ---------- */
+  main { padding: 8px 20px 0; max-width: 1180px; margin: 0 auto; }
+  .hero {
+    display: flex; gap: 18px; flex-wrap: wrap; align-items: center;
+    background: linear-gradient(120deg, #171a22 0%, #1d2029 100%);
+    border: 1px solid #262a34; border-left: 3px solid var(--accent);
+    border-radius: var(--radius); padding: 16px 18px; margin-bottom: 14px;
+  }
+  .hero .who { flex: 1 1 220px; }
+  .hero .cn { font-size: 1.5rem; font-weight: 800; letter-spacing: .5px; }
+  .hero .cn small { font-size: .82rem; font-weight: 400; color: var(--muted); margin-left: 7px; }
+  .hero .role { color: var(--muted); font-size: .84rem; margin-top: 5px; }
+  .hero .tags { margin-top: 7px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .hero .tags span { font-size: .68rem; background: #232734; border: 1px solid var(--line); padding: 2px 8px; border-radius: 999px; color: #c8ccd6; }
+  .stats { display: flex; gap: 10px; flex-wrap: wrap; }
+  .stat {
+    background: var(--panel-2); border: 1px solid #2b2f3a; border-radius: 11px;
+    padding: 9px 14px; min-width: 86px; text-align: center;
+  }
+  .stat b { display: block; font-size: 1.12rem; color: var(--accent-2); }
+  .stat span { font-size: .68rem; color: var(--muted); }
+
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 14px; }
+  .card {
+    background: var(--panel); border: 1px solid #262a34; border-radius: var(--radius);
+    padding: 14px 16px;
+  }
+  .card h3 {
+    margin: 0 0 8px; font-size: .78rem; color: var(--accent); letter-spacing: .6px;
+    text-transform: uppercase; display: flex; align-items: center; gap: 7px;
+  }
+  .card h3 .en { color: var(--muted); font-size: .7rem; text-transform: none; letter-spacing: 0; }
+  .card p { margin: 0; font-size: .86rem; color: #d3d7df; }
+  .card .nm { font-weight: 700; color: #fff; margin-bottom: 4px; font-size: .92rem; }
+  .legacy-row + .legacy-row { margin-top: 12px; padding-top: 12px; border-top: 1px dashed #2c313d; }
+  .empty-note { color: var(--muted); font-size: .82rem; font-style: italic; }
+
+  /* ---------- tree ---------- */
+  .treehead {
+    display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+    margin: 18px 0 10px;
+  }
+  .treehead h2 { margin: 0; font-size: 1.02rem; }
+  .treehead .hint { color: var(--muted); font-size: .76rem; }
+  .branchbar { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 12px; }
+  .bjump {
+    font-size: .74rem; padding: 5px 10px; border-radius: 999px;
+    background: var(--panel-2); border: 1px solid var(--line); color: #c8ccd6;
+    cursor: pointer; font-family: inherit;
+  }
+  .bjump:hover { border-color: var(--accent); color: var(--accent); }
+
+  details.branch {
+    background: var(--panel); border: 1px solid #262a34; border-radius: 12px;
+    margin-bottom: 10px; overflow: hidden;
+  }
+  details.branch[open] { border-color: #39414f; }
+  details.branch > summary {
+    list-style: none; cursor: pointer; padding: 12px 15px;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    background: var(--panel-2);
+  }
+  details.branch > summary::-webkit-details-marker { display: none; }
+  details.branch > summary:hover { background: #232734; }
+  details.branch > summary::before {
+    content: "▸"; color: var(--accent); font-size: .8rem; transition: transform .15s;
+  }
+  details.branch[open] > summary::before { content: "▾"; }
+  .bname { font-weight: 700; font-size: .92rem; }
+  .ben { color: var(--muted); font-size: .72rem; }
+  .bcount { margin-left: auto; color: var(--muted); font-size: .72rem; }
+  .bdy { padding: 6px 15px 14px; }
+
+  .node { padding: 10px 0 8px; border-bottom: 1px dashed #262b36; }
+  .node:last-child { border-bottom: none; }
+  .ntext { font-size: .87rem; color: #e3e6ec; }
+  .ntext .instr { color: var(--accent-2); font-weight: 600; }
+  ul.nsub { margin: 6px 0 0; padding-left: 20px; list-style: none; }
+  ul.nsub li { position: relative; font-size: .82rem; color: #bcc1cc; margin-bottom: 4px; }
+  ul.nsub li::before { content: "└"; position: absolute; left: -15px; color: #4a5262; }
+
+  /* ---------- 解鎖層級 ---------- */
+  .kb {
+    display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 999px;
+    font-size: .62rem; letter-spacing: .3px; vertical-align: 1px; white-space: nowrap;
+    border: 1px solid transparent; font-weight: 600;
+  }
+  .kb-base  { color: #f7c548; background: rgba(247,197,72,.12); border-color: rgba(247,197,72,.38); }
+  .kb-auto  { color: #70FBFF; background: rgba(112,251,255,.10); border-color: rgba(112,251,255,.34); }
+  .kb-extra { color: #6fd08a; background: rgba(90,174,112,.14); border-color: rgba(90,174,112,.45); }
+  .node.n-extra > .ntext { border-left-color: rgba(90,174,112,.6); }
+  .node > .ntext { border-left: 3px solid transparent; padding-left: 9px; margin-left: -12px; }
+  ul.nsub li.k-extra { color: #d3ecd8; }
+  ul.nsub li.k-extra::before { color: #5AAE70; }
+  ul.nsub li.k-auto { color: #cdf3f6; }
+  ul.nsub li.k-auto::before { color: #70FBFF; }
+
+  details.rulesbox {
+    background: var(--panel); border: 1px solid #2b3140; border-radius: 12px;
+    margin: 0 0 14px; padding: 0 14px;
+  }
+  details.rulesbox > summary {
+    list-style: none; cursor: pointer; padding: 12px 0;
+    font-weight: 700; font-size: .9rem; display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  }
+  details.rulesbox > summary::-webkit-details-marker { display: none; }
+  details.rulesbox > summary::before { content: "▸"; color: var(--accent); font-size: .8rem; }
+  details.rulesbox[open] > summary::before { content: "▾"; }
+  details.rulesbox > summary .hint { font-weight: 400; color: var(--muted); font-size: .76rem; }
+  details.rulesbox ol { margin: 0 0 10px; padding-left: 20px; }
+  details.rulesbox ol li { font-size: .84rem; color: #c8ccd6; margin-bottom: 6px; line-height: 1.6; }
+  details.rulesbox ol li b { color: var(--accent-2); }
+  details.rulesbox .warn {
+    font-size: .8rem; color: #b9c0cc; background: #14161d; border: 1px solid #2a2f3b;
+    border-left: 3px solid var(--accent); border-radius: 8px; padding: 9px 11px; margin: 0 0 12px; line-height: 1.65;
+  }
+  details.rulesbox .warn b { color: var(--accent); }
+
+  .hidden-block { margin-top: 12px; background: #14161d; border: 1px solid #2a2f3b; border-radius: 10px; padding: 10px 12px; }
+  .hidden-block h4 {
+    margin: 0 0 8px; font-size: .74rem; color: var(--dual); letter-spacing: .6px;
+    display: flex; align-items: center; gap: 7px;
+  }
+  .hidden-block h4 .en { color: var(--muted); letter-spacing: 0; font-weight: 400; }
+  .hrow2 { display: flex; gap: 9px; align-items: flex-start; font-size: .81rem; padding: 5px 0; }
+  .hrow2 + .hrow2 { border-top: 1px solid #20242e; }
+  .hrow2 .cond { color: #8fb7ff; flex: 1 1 46%; }
+  .hrow2 .arw { color: var(--muted); flex: 0 0 auto; }
+  .hrow2 .eff { color: #e3e6ec; flex: 1 1 46%; }
+  @media (max-width: 640px) {
+    .hrow2 { flex-direction: column; gap: 2px; }
+    .hrow2 .arw { display: none; }
+    .hrow2 .eff::before { content: "→ "; color: var(--muted); }
+  }
+
+  /* ---------- search results ---------- */
+  .sres-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 6px 0 12px; }
+  .sres-head h2 { margin: 0; font-size: 1rem; }
+  .sres-head .hint { color: var(--muted); font-size: .76rem; }
+  .sres {
+    display: block; width: 100%; text-align: left; cursor: pointer;
+    background: var(--panel); border: 1px solid #262a34; border-radius: 11px;
+    padding: 11px 14px; margin-bottom: 8px; color: var(--text); font-family: inherit;
+  }
+  .sres:hover { border-color: var(--accent); }
+  .sres .top { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: .76rem; color: var(--muted); margin-bottom: 4px; }
+  .sres .top .cname { color: var(--accent); font-weight: 700; font-size: .82rem; }
+  .sres .top .br { background: #232734; border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; }
+  .sres .body { font-size: .85rem; color: #d8dce4; }
+  mark { background: #f7c548; color: #221a00; border-radius: 3px; padding: 0 2px; }
+
+  footer { text-align: center; color: #5c6373; font-size: .72rem; padding: 22px 20px 10px; }
+  .notice {
+    background: #1a1d27; border: 1px solid #333a49; border-left: 3px solid var(--accent-2);
+    border-radius: 10px; padding: 10px 13px; font-size: .8rem; color: #c9cdd6; margin-bottom: 14px;
+  }
+</style>
+<link rel="stylesheet" href="compass-theme.css">
+<link rel="stylesheet" href="character-responsive.css">
+<link rel="stylesheet" href="ui-readability.css?v=20261016">
+</head>
+<body>
+<header>
+  <div class="hrow">
+    <h1><span class="page-brand">蒼翼混沌效應</span> <span class="hl page-title">角色技能樹</span><span class="tag">潛能一覽</span><a class="navlink" href="strategy-compass.html">↗ 策略羅盤</a></h1>
+  </div>
+
+</header>
+
+<div class="toolbar">
+  <div class="searchwrap">
+    <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></svg></span>
+    <input class="input" aria-label="跨角色搜尋潛能或招式" id="search" type="search" placeholder="跨角色搜尋潛能／招式，例：霸體、無敵幀、無盡冰刺" autocomplete="off">
+  </div>
+  <button type="button" class="btn btn-sm" onclick="expandAll(true)">全部展開</button>
+  <button type="button" class="btn btn-sm" onclick="expandAll(false)">全部收合</button>
+</div>
+
+<details class="rulesbox">
+  <summary>招式、強化與取得方式怎麼看？</summary>
+  <p>這份資料是招式與強化清單，尚不是逐條驗證的解鎖路徑。基礎普攻、跳躍與衝刺可能是初始動作，不能從分支第一項推定需要先抽取。</p>
+  <ul><li>「初始動作」只用於來源明確寫出預設具備的條目。</li>
+  <li>「追加招式」表示來源記載的新招式；具體前置與取得順序仍需核對。</li>
+  <li>「取得方式待核對」不代表自動獲得。三段跳、增加無敵幀等強化，請按遊戲實際取得情況確認。</li>
+  <li>隱藏效果的括號列出組合線索；完整跨分支前置與版本條件仍待核對。</li></ul>
+  <p class="warn">未標記或舊資料的 builtin／auto 分類，不足以證明某個強化隨招式免費生效。潛能通常需要對照遊戲本次選項取得，本頁不把整理條目數當作已取得數。</p>
+</details>
+
+<section class="charbar" aria-labelledby="charSelectTitle"><h2 id="charSelectTitle">選擇角色</h2><p class="hint">查看天賦、傳承技與招式分支。部分角色資料待補；歷史評級收在來源說明，不作目前強度排名。</p><div class="chips" id="chips"></div></section>
+
+<main id="app"></main>
+
+<footer>
+  資料整理自 <a href="https://blazblue.wiki/index.php?title=BlazBlue_Entropy_Effect/Prototypes" target="_blank" rel="noopener">blazblue.wiki · Prototypes</a>。遊戲版本未知 · 目錄來源 2026-10-15 · 標記修訂 2026-11-08 · 原始頁面版本與核對日期未保存，實際以遊戲內為準。
+</footer>
+
+<script src="character-data.js?v=20261108-audit-fixes"></script>
+<script src="player-catalogue.js?v=20261108-audit-fixes"></script>
+<script src="strategy-legacy.js?v=20261108-audit-fixes"></script>
+<script>
+const CHARS = (typeof CHARACTER_SKILLS !== 'undefined') ? CHARACTER_SKILLS : [];
+
+/* ---------- 工具 ---------- */
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function hl(s, q) {
+  const t = esc(s);
+  if (!q) return t;
+  const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+  return t.replace(re, m => '<mark>' + m + '</mark>');
+}
+/* 把「[地面] 普攻：…」的指令前綴標色 */
+function instr(t) {
+  return t.replace(/^((?:\[[^\]]+\]\s*)?(?:長按|按住)?(?:[上下左右]\+)?(?:普攻|技能|衝刺|跳躍|重擊|瞬移|攻擊|Dash|Attack|Skill|Jump)[^：:]{0,18}[：:])/, m => '<span class="instr">' + m + '</span>');
+}
+function pctInfo(c) {
+  const m = String(c || '').match(/(\d+)\s*潛能\s*[（(]?(\+?\d+%)?/);
+  if (!m) return { n: '—', p: '' };
+  return { n: m[1], p: m[2] || '' };
+}
+
+/* 解鎖層級標籤 */
+const KIND_BADGE = {
+  base: '<span class="kb kb-base">招式說明 · 取得方式待核對</span>',
+  auto: '<span class="kb kb-auto">關聯動作 · 取得方式待核對</span>',
+  extra: '<span class="kb kb-extra">追加招式 · 前置待核對</span>',
+  builtin: '<span class="kb kb-pending">強化條目 · 取得方式待核對</span>'
+};
+function kindBadge(k,text='') {
+  if(k==='base'&&text.includes('預設'))return '<span class="kb kb-base">初始動作</span>';
+  return KIND_BADGE[k] || '<span class="kb kb-pending">取得方式待核對</span>';
+}
+
+let curId = null;
+let query = '';
+
+function portrait(c) {
+  return `<span class="char-avatar"><span class="char-glyph" aria-hidden="true">${esc(c.name.slice(0, 1))}</span><img src="assets/portraits/${esc(c.id)}.png" alt="" width="64" height="64" class="w-full h-full object-cover" decoding="async" onerror="this.hidden=true"></span>`;
+}
+const SKILL_ICONS = {
+  talent: 'M12 2l2.6 6.4L21 9l-5 4.6L17.5 21 12 17.3 6.5 21 8 13.6 3 9l6.4-.6z',
+  legacy: 'M12 2c1 4 5 6 5 11a5 5 0 01-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-6 1-10z',
+  tree: 'M12 3v6M5 15V9h14v6M3 15h4v5H3zM10 15h4v5h-4zM17 15h4v5h-4zM12 9v6',
+  mechanic: 'M12 3l8 4v10l-8 4-8-4V7zM12 8l4 4-4 4-4-4z'
+};
+function skillIcon(name) { return `<svg class="w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${SKILL_ICONS[name]}"/></svg>`; }
+
+/* ---------- 角色列 ---------- */
+function renderChips() {
+  document.getElementById('chips').innerHTML = CHARS.map(c => `
+    <button type="button" class="chip ${curId === c.id ? 'active' : ''}" onclick="selectChar('${c.id}')" aria-pressed="${curId === c.id}" aria-label="${esc(c.name + ' · ' + (c.role || '') + (c.hasData ? '' : ' · 暫無潛能資料'))}">
+      ${portrait(c)}
+      <span class="cname">${curId === c.id ? '✓ ' : ''}${esc(c.name)}</span>
+      <span class="crole">${c.hasData ? esc(c.role || '') : '暫無潛能資料'}</span>
+    </button>`).join('');
+  document.querySelector('#chips .active')?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+}
+
+/* ---------- 角色頁 ---------- */
+function renderChar() {
+  const c = CHARS.find(x => x.id === curId);
+  const app = document.getElementById('app');
+  if (!c) { app.innerHTML = '<p class="empty-note">請選擇一位角色。</p>'; return; }
+  if (!c.hasData) {
+    app.innerHTML = `
+      <div class="hero">
+        ${portrait(c)}
+        <div class="who">
+          <div class="cn">${esc(c.name)} <small>${esc(c.alias)}</small></div>
+          <div class="role">${esc(c.role || '')}</div>
+        </div>
+      </div>
+      <div class="notice">本資料集尚未收錄 ${esc(c.name)} 的潛能資料；不代表遊戲或來源網站沒有此角色內容。</div>
+      <div class="card"><h3>可先看什麼</h3>
+        <p>策略羅盤的「角色推薦」區塊有這名角色的推薦流派與核心策略，可以先從那裡配裝。</p>
+        <p style="margin-top:8px"><a href="strategy-compass.html?char=${esc(c.id)}">前往策略羅盤查看 ${esc(c.name)} 的推薦流派 →</a></p>
+      </div>`;
+    return;
+  }
+  const p = pctInfo(c.potentialCount);
+  const talent = c.talent || null;
+  const mech = c.uniqueMechanic || null;
+  const donor = CompassLegacy.donors[c.id];
+  const legacy = c.legacySkills?.length ? c.legacySkills : (donor?.skills || []).map(([name,desc],i)=>({nameZh:name,desc:desc+(i===1?' 第二傳承技需在遊戲解鎖。':''),summary:true}));
+
+  app.innerHTML = `${searchReturn ? '<button type="button" class="btn btn-sm" onclick="history.back()">返回搜尋結果</button>' : ''}
+    <div class="hero">
+      ${portrait(c)}
+      <div class="who">
+        <div class="cn">${esc(c.name)} <small>${esc(c.nameEn || c.alias)}</small></div>
+        <div class="role">
+          ${esc(c.role || '')}
+        </div>
+        ${(c.tags && c.tags.length) ? `<div class="tags">${c.tags.filter(t=>!t.includes('最高')&&!t.includes('最強')).map(t => `<span>${esc(t)}</span>`).join('')}</div>` : ''}
+      </div>
+      <div class="stats">
+        <div class="stat"><b>${c.baseHp == null ? '—' : esc(c.baseHp)}</b><span>基礎 HP</span></div>
+        <div class="stat"><b>${c.baseAtk == null ? '—' : esc(c.baseAtk)}</b><span>基礎 ATK</span></div>
+        <div class="stat"><b>${esc(p.n)}</b><span>來源標稱潛能數</span></div>
+        <div class="stat"><b>${c.branchCount}</b><span>招式分支</span></div>
+        <div class="stat"><b>${c.nodeCount}</b><span>整理條目，非取得數</span></div>
+      </div>
+    </div>
+
+    <details class="rulesbox"><summary>資料來源與適用範圍</summary><p>歷史社群評級：${esc(c.tier)}，評級版本與依據未逐條保存，不用作目前強度排序。來源潛能百分比 ${esc(p.p || '未記載')} 的含義與版本待核對，未當作目前配裝增傷。</p><p>既有社群整理，尚未按現行遊戲版本重新核實。角色推薦評級與潛能來源分開，不代表遊戲稀有度。</p>
+      ${(c.sourceIds||[]).map(id=>CHARACTER_SOURCES.find(s=>s.sourceId===id)).filter(Boolean).map(s=>`<p>本地來源：<a href="${esc(s.path)}">${esc(s.path)}</a> · 社群資料 · 遊戲版本／核對日期未知</p>`).join('')}
+    </details>
+    ${c.overview ? `<div class="card" style="margin-bottom:14px"><h3>來源玩法描述（歷史參考）</h3><p>${esc(c.overview)}</p></div>` : ''}
+
+    <div class="grid2">
+      ${talent ? `<div class="card"><h3>${skillIcon('talent')}天賦 <span class="en">Talent</span></h3>
+        <div class="nm">${esc(talent.nameZh)}</div><p>${esc(talent.desc)}</p></div>`
+      : `<div class="card"><h3>${skillIcon('talent')}天賦 <span class="en">Talent</span></h3><p class="empty-note">本資料集尚未收錄。</p></div>`}
+      ${mech ? `<div class="card"><h3>${skillIcon('mechanic')}獨特機制 <span class="en">Unique Mechanic</span></h3>
+        <div class="nm">${esc(mech.nameZh)}</div><p>${esc(mech.desc)}</p></div>`
+      : `<div class="card"><h3>${skillIcon('mechanic')}獨特機制 <span class="en">Unique Mechanic</span></h3><p class="empty-note">本資料集尚未收錄。</p></div>`}
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <h3>${skillIcon('legacy')}傳承技 <span class="en">Legacy Skill</span></h3>
+      ${legacy.length ? legacy.map(l => `
+        <div class="legacy-row">
+          <div class="nm">${esc(l.nameZh)}</div>
+          <p>${esc(l.desc)}</p>${l.summary?`<small>與策略羅盤共用的社群機制摘要 · 完整數值待補 · <a href="${esc(donor.source)}" target="_blank" rel="noopener">來源</a></small>`:''}
+        </div>`).join('')
+      : '<p class="empty-note">本資料集尚未收錄這名角色的傳承技資料（可在遊戲內查詢）。</p>'}
+    </div>
+
+    <div class="treehead">
+      <h2>${skillIcon('tree')}潛能樹</h2>
+      <span class="hint">${c.branchCount} 個招式分支 · ${c.nodeCount} 個節點（含子效果）· 點分支展開</span>
+    </div>
+    <div class="branchbar">
+      ${c.branches.map((b, i) => `<button class="bjump" onclick="jumpBranch(${i})">${esc(b.nameZh)}</button>`).join('')}
+    </div>
+    ${c.branches.map((b, i) => renderBranch(b, i)).join('')}
+  `;
+}
+
+function renderBranch(b, i) {
+  const nodes = b.nodes || [];
+  const sub = nodes.reduce((a, n) => a + ((n.sub || []).length), 0);
+  const hidden = b.hidden || [];
+  const need = nodes.reduce((a, n) =>
+    a + (n.kind === 'extra' ? 1 : 0) + (n.sub || []).filter(x => x.k === 'extra').length, 0);
+  return `
+  <details class="branch" id="br-${curId}-${i}" ${i === 0 ? 'open' : ''}>
+    <summary tabindex="0">
+      <span class="bname">${esc(b.nameZh)}</span>
+      <span class="ben">${esc(b.nameEn || '')}</span>
+      <span class="bcount">${nodes.length + sub} 節點${need ? ' · ' + need + ' 追加招式標記' : ''}${hidden.length ? ' · ' + hidden.length + ' 隱藏效果' : ''}</span>
+    </summary>
+    <div class="bdy">
+      ${nodes.length ? nodes.map(n => `
+        <div class="node n-${esc(n.kind || 'unknown')}">
+          <div class="ntext">${instr(esc(n.text || ''))}${kindBadge(n.kind,n.text || '')}</div>
+          ${(n.sub || []).length ? `<ul class="nsub">${n.sub.map(x => `<li class="k-${esc(x.k || 'unknown')}">${esc(x.t)}${kindBadge(x.k,x.t || '')}</li>`).join('')}</ul>` : ''}
+        </div>`).join('')
+      : '<p class="empty-note">本資料集尚未收錄此分支的內容。</p>'}
+      ${hidden.length ? `
+      <div class="hidden-block">
+        <h4>隱藏效果 <span class="en">Hidden Effects · 跨分支連動</span></h4>
+        ${hidden.map(h => `
+          <div class="hrow2">
+            <div class="cond">${esc(h.cond || '')}</div>
+            <div class="arw">→</div>
+            <div class="eff">${esc(h.effect || '')}</div>
+          </div>`).join('')}
+      </div>` : ''}
+    </div>
+  </details>`;
+}
+
+/* ---------- 跨角色搜尋 ---------- */
+function renderSearch() {
+  const q = query.trim();
+  const app = document.getElementById('app');
+  if (!q) { renderChar(); return; }
+  const ql = q.toLowerCase();
+  const hits = [], seen = new Set();
+  CHARS.forEach(c => {
+    if (!c.hasData) return;
+    const push = (brIdx, brName, label, text) => {
+      const key = JSON.stringify([c.id,brIdx,label,text]);
+      if (hits.length < 80 && !seen.has(key) && CompassCatalogue.matches(ql,text)) {
+        seen.add(key); hits.push({ c, brIdx, brName, label, text });
+      }
+    };
+    (c.overview) && push(-1, '', '玩法', c.overview);
+    (c.talent) && (push(-1, '', '天賦', c.talent.nameZh), push(-1, '', '天賦', c.talent.desc));
+    (c.uniqueMechanic) && (push(-1, '', '獨特機制', c.uniqueMechanic.nameZh), push(-1, '', '獨特機制', c.uniqueMechanic.desc));
+    (c.legacySkills?.length ? c.legacySkills : (CompassLegacy.donors[c.id]?.skills || []).map(([nameZh,desc])=>({nameZh,desc}))).forEach(l => { push(-2, '', '傳承技', l.nameZh); push(-2, '', '傳承技', l.desc); });
+    (c.branches || []).forEach((b, i) => {
+      push(i, b.nameZh, '招式分支', b.nameZh + (b.nameEn && !b.nameZh.includes(b.nameEn) ? ' · '+b.nameEn : ''));
+      (b.nodes || []).forEach(n => {
+        push(i, b.nameZh, n.kind === 'extra' ? '追加招式（前置待核對）' : '招式／強化（取法待核對）', n.text);
+        (n.sub || []).forEach(x => push(i, b.nameZh, x.k === 'extra' ? '追加招式（前置待核對）' : '強化／附註（取法待核對）', x.t));
+      });
+      (b.hidden || []).forEach(h => push(i, b.nameZh, '隱藏效果', (h.cond || '') + ' → ' + (h.effect || '')));
+    });
+  });
+  app.innerHTML = `
+    <div class="sres-head">
+      <h2>搜尋「${esc(q)}」</h2>
+      <span class="hint">${hits.length >= 80 ? '顯示前 80 筆' : '共 ' + hits.length + ' 筆'} · 點擊可直接跳到該角色的分支</span>
+    </div>
+    ${hits.length ? hits.map((h,index) => `
+      <button type="button" class="sres" data-hit="${index}" onclick="jumpBranch(${h.brIdx}, '${h.c.id}', ${index})">
+        <span class="top">
+          <span class="cname">${esc(h.c.name)}</span>
+          ${h.brName ? `<span class="br">${esc(h.brName)}</span>` : ''}
+          <span>${esc(h.label)}</span>
+        </span>
+        <span class="body">${hl(h.text, q)}</span>
+      </button>`).join('')
+    : '<p class="empty-note">沒有找到相符的內容。可試試：霸體、無敵幀、回復、衝刺、召喚。</p><button type="button" class="btn btn-sm" onclick="clearSearch()">清空搜尋</button>'}`;
+}
+
+/* ---------- 互動 ---------- */
+let searchReturn = false;
+function writeRoute(push = false, branch = null, extra = {}) {
+  const url = new URL(location.href);
+  url.searchParams.set('char',curId);
+  if(query) url.searchParams.set('q',query); else url.searchParams.delete('q');
+  if(branch !== null) url.searchParams.set('branch',branch); else url.searchParams.delete('branch');
+  try { history[push ? 'pushState' : 'replaceState']({searchReturn,...extra},'',url); } catch(e) {}
+}
+function clearSearch() {
+  query=''; searchReturn=false; document.getElementById('search').value='';
+  writeRoute(); renderChar(); document.getElementById('search').focus();
+}
+function selectChar(id) {
+  searchReturn = false;
+  curId = id;
+  query = '';
+  const si = document.getElementById('search');
+  if (si) si.value = '';
+  writeRoute(true);
+  renderChips();
+  renderChar();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function jumpBranch(idx, charId, hitIndex) {
+  const fromSearch = Boolean(query);
+  if(fromSearch) writeRoute(false,null,{scrollY:window.scrollY,hitIndex});
+  if (charId && (charId !== curId || query)) {
+    curId = charId; query = '';
+    searchReturn = fromSearch;
+    document.getElementById('search').value = '';
+    renderChips();
+    renderChar();
+  }
+  writeRoute(true,idx);
+  if (idx < 0) {
+    const heading=document.querySelector('#app .cn');
+    if(heading) { heading.tabIndex=-1; heading.focus({preventScroll:true}); }
+    window.scrollTo({ top: 0, behavior: 'instant' }); return;
+  }
+  const el = document.getElementById('br-' + curId + '-' + idx);
+  if (el) {
+    el.open = true;
+    el.querySelector('summary').focus({preventScroll:true});
+    el.scrollIntoView({ behavior: 'instant', block: 'start' });
+  }
+}
+
+function expandAll(open) {
+  document.querySelectorAll('details.branch').forEach(d => { d.open = open; });
+}
+
+/* ---------- 初始化 ---------- */
+(function init() {
+  if (typeof ResizeObserver !== 'undefined') {
+    const observer = new ResizeObserver(() => {
+      const head = document.querySelector('header').getBoundingClientRect().height;
+      const toolbar = document.querySelector('.toolbar').getBoundingClientRect().height;
+      document.documentElement.style.setProperty('--header-height', head + 'px');
+      document.documentElement.style.setProperty('--jump-offset', (head + toolbar + 16) + 'px');
+    });
+    observer.observe(document.querySelector('header'));
+    observer.observe(document.querySelector('.toolbar'));
+  }
+  const params = new URLSearchParams(location.search);
+  const want = params.get('char');
+  curId = (want && CHARS.some(c => c.id === want)) ? want : (CHARS[0] ? CHARS[0].id : null);
+  searchReturn=Boolean(history.state?.searchReturn);
+  const si = document.getElementById('search');
+  query=params.get('q') || '';
+  si.value=query;
+  si.addEventListener('input', () => { query = si.value; searchReturn=false; writeRoute(); renderSearch(); });
+  window.addEventListener('popstate',event=>{
+    const p=new URLSearchParams(location.search);
+    const id=p.get('char');
+    if(CHARS.some(c=>c.id===id)) curId=id;
+    query=p.get('q')||''; si.value=query; searchReturn=Boolean(event.state?.searchReturn);
+    renderChips(); renderSearch();
+    if(query) {
+      document.querySelector(`[data-hit="${Number(event.state?.hitIndex)||0}"]`)?.focus({preventScroll:true});
+      window.scrollTo({top:event.state?.scrollY||0,behavior:'instant'});
+    } else if(p.has('branch')) focusBranch(Number(p.get('branch')));
+  });
+  renderChips();
+  renderSearch();
+  if(!query && params.has('branch')) focusBranch(Number(params.get('branch')));
+})();
+function focusBranch(idx) {
+  const el=document.getElementById('br-'+curId+'-'+idx);
+  if(el) { el.open=true; el.querySelector('summary').focus({preventScroll:true}); el.scrollIntoView({block:'start'}); }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "bbe-strategy-compass",
+  "version": "1.0.0",
+  "private": true,
+  "description": "蒼翼混沌效應策略羅盤與角色技能查詢工具",
+  "scripts": {
+    "test": "node --test tests/*.test.cjs"
+  }
+}

@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>蒼翼混沌效應 · 策略羅盤</title>
+<link rel="stylesheet" href="vendor/daisyui.css">
+<script src="vendor/tailwind-browser.js"></script>
+<style>
+  :root {
+    --bg: #0b0c10;
+    --panel: #15171f;
+    --panel-2: #1e212b;
+    --panel-3: #252836;
+    --text: #e8e9ec;
+    --muted: #9aa0af;
+    --accent: #ff6b35;
+    --accent-2: #f7c548;
+    --fire: #ff4d4d;
+    --ice: #4dd2ff;
+    --elec: #a78bfa;
+    --poison: #4ade80;
+    --dark: #94a3b8;
+    --light: #fde047;
+    --blade: #f97316;
+    --dual: #ef4444;
+    --line: #3f4452;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", "Microsoft JhengHei", "PingFang TC", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  header {
+    background: linear-gradient(90deg, #14161d 0%, #1f222d 100%);
+    padding: 18px 20px;
+    border-bottom: 1px solid #2a2d38;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 1.35rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  header h1 .tag {
+    font-size: .7rem;
+    background: var(--dual);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 700;
+  }
+  header p { margin: 6px 0 0; color: var(--muted); font-size: .85rem; }
+  nav {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    background: var(--panel);
+    border-bottom: 1px solid #2a2d38;
+  }
+  nav button {
+    flex: 0 0 auto;
+    border: 1px solid #333842;
+    background: var(--panel-2);
+    color: var(--text);
+    padding: 8px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: .9rem;
+    transition: .15s;
+    white-space: nowrap;
+  }
+  nav button:hover { background: #2a2e3b; }
+  nav button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  main { padding: 16px; max-width: 1200px; margin: 0 auto; }
+  .section { display: none; }
+  .section.active { display: block; animation: fade .25s; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: none;} }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid #2a2d38;
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .card h2 { margin: 0 0 12px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 700;
+    color: #fff;
+  }
+  .badge.fire { background: var(--fire); }
+  .badge.ice { background: var(--ice); color: #001018; }
+  .badge.elec { background: var(--elec); }
+  .badge.poison { background: var(--poison); color: #001808; }
+  .badge.dark { background: var(--dark); color: #0a0d12; }
+  .badge.light { background: var(--light); color: #2a2400; }
+  .badge.blade { background: var(--blade); }
+  .badge.dual { background: var(--dual); }
+  .badge.lvl { background: #3b82f6; }
+  .badge.slot { background: #6366f1; }
+
+  .slot-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .slot-tabs button {
+    border: 1px solid #333842;
+    background: var(--panel-2);
+    color: var(--text);
+    padding: 8px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: .95rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .slot-tabs button:hover { background: #2a2e3b; }
+  .slot-tabs button.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .slot-icon { font-size: 1.1rem; }
+
+  .filter-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+    align-items: center;
+  }
+  .filter-bar span { color: var(--muted); font-size: .8rem; }
+  .filter-bar button {
+    border: 1px solid #333842;
+    background: var(--panel-2);
+    color: var(--text);
+    padding: 4px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: .8rem;
+  }
+  .filter-bar button.active { outline: 2px solid var(--accent); }
+
+  .tree-forest { display: flex; flex-direction: column; gap: 18px; }
+  .skill-tree {
+    background: var(--panel-2);
+    border: 1px solid #2a2d38;
+    border-radius: var(--radius);
+    padding: 16px;
+    position: relative;
+  }
+  .tree-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .tree-header h3 { margin: 0; font-size: 1.05rem; color: var(--accent-2); }
+
+  .tree-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+
+  .tree-stage {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    padding: 0 24px;
+  }
+  .tree-stage:first-child { padding-left: 0; }
+  .tree-stage:last-child { padding-right: 0; }
+
+  .stage-label {
+    font-size: .7rem;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 4px;
+    letter-spacing: .5px;
+  }
+
+  .node-cluster {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+    flex: 1;
+  }
+
+  .node {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--panel-3);
+    border: 2px solid var(--line);
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: .88rem;
+    cursor: pointer;
+    user-select: none;
+    transition: .15s;
+    position: relative;
+    white-space: nowrap;
+  }
+  .node:hover { transform: translateY(-2px); }
+  .node.owned { background: #1f3a2e; border-color: #22c55e; color: #bbf7d0; box-shadow: 0 0 12px rgba(34,197,94,.2); }
+  .node.recommended { animation: pulse 1.5s infinite; border-color: var(--accent-2); }
+  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(247,197,72,.3)} 50%{box-shadow:0 0 0 6px rgba(247,197,72,0)} }
+  .node .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--line);
+  }
+  .node.owned .dot { background: #22c55e; }
+
+  .tree-stage:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 50%;
+    width: 24px;
+    height: 2px;
+    background: var(--line);
+    transform: translateY(8px);
+  }
+  .tree-stage:not(:first-child)::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 24px;
+    height: 2px;
+    background: var(--line);
+    transform: translateY(8px);
+  }
+
+  .dual-panel {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed #353a47;
+  }
+  .dual-panel h4 { margin: 0 0 10px; font-size: .85rem; color: var(--dual); }
+  .dual-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .dual-chip {
+    background: #2a1515;
+    border: 1px solid #5c2b2b;
+    color: #fecaca;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: .78rem;
+    cursor: pointer;
+  }
+  .dual-chip.ready { background: #14532d; border-color: #22c55e; color: #bbf7d0; }
+  .dual-chip.one-away { background: #422006; border-color: var(--accent-2); color: #fef08a; }
+
+  .dual-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+  .dual-card {
+    background: var(--panel-2);
+    border: 1px solid #353a47;
+    border-radius: 10px;
+    padding: 12px;
+    position: relative;
+  }
+  .dual-card.ready { border-color: #22c55e; background: #1a2e22; }
+  .dual-card.one-away { border-color: var(--accent-2); }
+  .dual-card.inherited { border-color: #a78bfa; background: #261f35; }
+  .dual-card h4 { margin: 0 0 6px; font-size: 1rem; color: var(--dual); }
+  .dual-card p { margin: 4px 0; font-size: .82rem; color: var(--muted); }
+  .dual-card .reqs { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .req-pill {
+    font-size: .75rem;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #2a2e3b;
+    border: 1px solid #3f4452;
+  }
+  .req-pill.ok { background: #14532d; border-color: #22c55e; color: #bbf7d0; }
+  .req-pill.miss { background: #450a0a; border-color: #ef4444; color: #fecaca; }
+
+  .conflict-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+  }
+  .conflict-card {
+    background: var(--panel-2);
+    border: 1px solid #5c2b2b;
+    border-radius: 10px;
+    padding: 12px;
+  }
+  .conflict-card h4 { margin: 0 0 8px; font-size: .95rem; color: #fecaca; }
+  .conflict-card p { margin: 4px 0; font-size: .82rem; color: var(--muted); }
+  .conflict-card .dual-mini {
+    display: inline-block;
+    background: #2a1515;
+    border: 1px solid #5c2b2b;
+    color: #fecaca;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: .78rem;
+    margin: 3px 4px 3px 0;
+  }
+  .conflict-card .dual-mini.ready { background: #14532d; border-color: #22c55e; color: #bbf7d0; }
+  .conflict-card .dual-mini.inherited { background: #261f35; border-color: #a78bfa; color: #e9d5ff; }
+
+  /* Build simulator */
+  .build-summary {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+    align-items: center;
+  }
+  .build-summary .stat-box {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+    background: var(--panel-2);
+    border-radius: 10px;
+    padding: 12px;
+  }
+  .build-summary .stat-box .num { font-size: 1.5rem; font-weight: 700; color: var(--accent-2); }
+  .build-summary .stat-box .label { font-size: .75rem; color: var(--muted); }
+  .build-summary > button {
+    background: #450a0a;
+    border: 1px solid #ef4444;
+    color: #fecaca;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: .9rem;
+  }
+  .build-summary > button:hover { background: #7f1d1d; }
+
+  .build-board {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .build-column {
+    background: var(--panel-2);
+    border: 1px solid #2a2d38;
+    border-radius: var(--radius);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+  }
+  .build-column h3 {
+    margin: 0;
+    font-size: .95rem;
+    text-align: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #353a47;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .build-group {
+    background: rgba(0,0,0,.15);
+    border-radius: 8px;
+    padding: 8px;
+  }
+  .build-group h4 {
+    margin: 0 0 8px;
+    font-size: .8rem;
+    color: var(--accent-2);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .build-tier {
+    margin-bottom: 8px;
+  }
+  .build-tier-label {
+    font-size: .65rem;
+    color: var(--muted);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+  .build-nodes {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .build-node {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--panel-3);
+    border: 2px solid var(--line);
+    padding: 6px 8px;
+    border-radius: 8px;
+    font-size: .8rem;
+    cursor: pointer;
+    transition: .15s;
+    position: relative;
+  }
+  .build-node:hover:not(.disabled) { transform: translateY(-1px); border-color: #4b5160; }
+  .build-node.selected {
+    background: #1f3a2e;
+    border-color: #22c55e;
+    color: #bbf7d0;
+  }
+  .build-node .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .build-node .check {
+    margin-left: auto;
+    font-size: .85rem;
+    color: #22c55e;
+  }
+
+  .build-result {
+    background: var(--panel-2);
+    border: 1px solid #2a2d38;
+    border-radius: var(--radius);
+    padding: 14px;
+  }
+  .build-result h3 { margin: 0 0 10px; font-size: 1rem; color: var(--dual); }
+  .build-result .empty { color: var(--muted); font-size: .85rem; }
+  .synthesized-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #2a1515;
+    border: 1px solid var(--dual);
+    color: #fecaca;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: .82rem;
+    margin: 3px 6px 3px 0;
+  }
+
+  .dual-progress {
+    background: var(--panel);
+    border: 1px solid #2a2d38;
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .dual-progress h2 {
+    margin: 0 0 12px;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .progress-bar {
+    height: 10px;
+    background: #2a2e3b;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--dual), #ff8a65);
+    border-radius: 999px;
+    transition: width .3s;
+  }
+  .progress-text {
+    font-size: .85rem;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .progress-text strong { color: var(--accent-2); }
+  .active-duals {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* ---- 雙重策略進度：以已選策略推導 ---- */
+  .dual-progress h2 .dp-total {
+    margin-left: auto;
+    font-size: .75rem;
+    font-weight: 400;
+    color: var(--muted);
+  }
+  .dp-hint { font-size: .78rem; color: var(--muted); margin: 0 0 12px; }
+  .dp-done { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+  .dp-empty { color: var(--muted); font-size: .8rem; margin: 8px 0 0; }
+
+  .dp-sec { margin-top: 14px; border-top: 1px solid #23262f; padding-top: 12px; }
+  .dp-sec-head { display: flex; align-items: center; gap: 8px; margin-bottom: 9px; }
+  .dp-sec-title { font-size: .88rem; font-weight: 600; }
+  .dp-sec-count {
+    font-size: .7rem; background: var(--panel-3); color: var(--muted);
+    padding: 1px 8px; border-radius: 999px;
+  }
+  .dp-sec-note { font-size: .72rem; color: var(--muted); }
+  .dp-more { margin: 8px 0 0; font-size: .74rem; color: var(--muted); text-align: center; }
+  .dp-hidden-note { margin: 8px 0 0; font-size: .74rem; color: var(--muted); opacity: .85; }
+  .slot-hidden-note { margin: 6px 0 0; font-size: .7rem; color: var(--muted); opacity: .8; line-height: 1.5; }
+  .dp-toggle {
+    margin-left: auto; background: transparent; border: 1px solid var(--line);
+    color: var(--muted); font-size: .72rem; padding: 3px 12px;
+    border-radius: 999px; cursor: pointer;
+  }
+  .dp-toggle:hover { border-color: var(--muted); color: var(--text); }
+
+  .dp-rows { display: flex; flex-direction: column; gap: 8px; }
+
+  .dr {
+    background: var(--panel-2);
+    border: 1px solid #2a2d38;
+    border-left: 3px solid var(--line);
+    border-radius: 10px;
+    padding: 9px 12px;
+  }
+  .dr--done { border-left-color: #22c55e; opacity: .9; }
+  .dr--now { border-left-color: var(--accent-2); }
+  .dr--far { border-left-color: #4b5160; }
+  .dr--blocked { border-left-color: #5b6273; opacity: .85; }
+
+  .dr-head { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+  .dr-name { font-weight: 600; font-size: .9rem; }
+  .dr-double {
+    font-size: .63rem; background: #3a1a1a; color: #fca5a5;
+    border: 1px solid #6b2020; padding: 0 5px; border-radius: 4px;
+  }
+  .dr-steps { margin-left: auto; font-size: .72rem; color: var(--muted); white-space: nowrap; }
+  .dr--now .dr-steps { color: var(--accent-2); font-weight: 600; }
+
+  .dr-reqs { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 7px; }
+  .dr-plus { color: #5b6273; font-size: .75rem; }
+  .dr-pill { font-size: .78rem; padding: 2px 10px; border-radius: 999px; border: 1px solid; }
+  .dr-pill.ok { border-color: #2f6b4a; background: #12251c; color: #7ee2a8; }
+  .dr-pill.miss { border-color: #3f4452; background: #1b1e27; color: var(--muted); border-style: dashed; }
+
+  .dr-gap {
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 8px; font-size: .76rem; color: var(--muted);
+  }
+  .dr-gap-txt { flex: 1; }
+  .dr-add {
+    flex: none; background: #2a2400; border: 1px solid var(--accent-2);
+    color: var(--accent-2); font-size: .72rem; padding: 3px 12px;
+    border-radius: 999px; cursor: pointer; white-space: nowrap;
+  }
+  .dr-add:hover { background: #3a3000; }
+  .dr-why { margin-top: 7px; font-size: .76rem; color: #e0a0a0; }
+
+  @media (max-width: 900px) {
+    .build-board { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 600px) {
+    .build-board { grid-template-columns: 1fr; }
+  }
+
+  .rec-list { display: flex; flex-direction: column; gap: 10px; }
+  .rec-item {
+    background: var(--panel-2);
+    border-radius: 10px;
+    padding: 12px;
+    border-left: 4px solid var(--accent);
+  }
+  .rec-item h4 { margin: 0 0 4px; font-size: .95rem; }
+  .rec-item p { margin: 0; font-size: .82rem; color: var(--muted); }
+  .rec-item .value { color: var(--accent-2); font-weight: 700; }
+
+  .toolbar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .toolbar button, .toolbar label {
+    background: var(--panel-2);
+    border: 1px solid #353a47;
+    color: var(--text);
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: .85rem;
+  }
+  .toolbar button:hover { background: #2a2e3b; }
+  .toolbar input[type="file"] { display: none; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .stat-box {
+    background: var(--panel-2);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+  }
+  .stat-box .num { font-size: 1.6rem; font-weight: 700; color: var(--accent-2); }
+  .stat-box .label { font-size: .75rem; color: var(--muted); }
+
+  .note {
+    background: #1f2533;
+    border: 1px solid #2f3a52;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: .82rem;
+    color: #b8c5e2;
+    margin-bottom: 14px;
+  }
+  .note strong { color: var(--accent-2); }
+
+  .inherit-editor {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+  }
+  .inherit-slot {
+    background: var(--panel-2);
+    border-radius: 10px;
+    padding: 12px;
+  }
+  .inherit-slot label { font-size: .8rem; color: var(--muted); display: block; margin-bottom: 6px; }
+  .inherit-slot select {
+    width: 100%;
+    background: #252836;
+    border: 1px solid #353a47;
+    color: var(--text);
+    padding: 8px;
+    border-radius: 6px;
+  }
+
+  footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--muted);
+    font-size: .78rem;
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .data-dialog {
+    background: var(--panel);
+    border: 1px solid #353a47;
+    border-radius: var(--radius);
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 20px;
+  }
+  .data-dialog h3 { margin-top: 0; }
+  .data-dialog pre {
+    background: #0d0e12;
+    padding: 12px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: .8rem;
+  }
+
+  @media (max-width: 640px) {
+    .tree-row { flex-direction: column; gap: 16px; }
+    .tree-stage { padding: 12px 0; width: 100%; }
+    .tree-stage:not(:last-child)::after {
+      left: 20px; top: auto; bottom: -16px; width: 2px; height: 16px; transform: none;
+    }
+    .tree-stage:not(:first-child)::before {
+      left: 20px; top: -16px; width: 2px; height: 16px; transform: none;
+    }
+    .node-cluster { flex-direction: row; flex-wrap: wrap; }
+    .stage-label { text-align: left; }
+  }
+
+  /* ===== 顯示邏輯 v3：推薦／不可選 ===== */
+  /* 推薦：單層金色細邊 + 左側細條，不使用動畫，避免同時亮一片 */
+  .build-node.recommended {
+    border-color: rgba(247,197,72,.7);
+    background: rgba(247,197,72,.09);
+    box-shadow: inset 3px 0 0 0 var(--accent-2);
+  }
+  .build-node.recommended:hover { background: rgba(247,197,72,.16); border-color: var(--accent-2); }
+  /* 不可選：統一淡化 + 虛線，滑過顯示原因 */
+  .build-node.conflict {
+    opacity: .42;
+    border-style: dashed;
+    background: transparent;
+    cursor: not-allowed;
+  }
+  .build-node.conflict:hover { transform: none; border-color: var(--line); }
+  .build-node .node-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .build-node .lvl {
+    flex: 0 0 auto;
+    font-size: .6rem;
+    letter-spacing: .4px;
+    color: #8b93a5;
+    border: 1px solid #3f4452;
+    border-radius: 4px;
+    padding: 0 4px;
+  }
+  .build-node .verdict {
+    flex: 0 0 auto;
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .3px;
+    padding: 1px 7px;
+    border-radius: 999px;
+  }
+  .build-node .verdict.ok { color: #22c55e; }
+  .build-node .verdict.rec { background: var(--accent-2); color: #2a2400; }
+  .build-node .verdict.no { background: #333846; color: #b6bdcc; }
+
+  /* ===== 推薦摘要條 ===== */
+  .rec-strip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    background: var(--panel-2);
+    border: 1px solid #2a2d38;
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    margin-bottom: 10px;
+  }
+  .rec-title { flex: 0 0 auto; font-size: .76rem; font-weight: 700; color: var(--accent-2); }
+  .rec-empty { font-size: .78rem; color: var(--muted); }
+  .rec-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #2a2400;
+    border: 1px solid rgba(247,197,72,.55);
+    color: #ffe9a3;
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: .78rem;
+    cursor: pointer;
+    transition: .15s;
+    font-family: inherit;
+  }
+  .rec-chip:hover { background: #38300a; border-color: var(--accent-2); }
+  .rec-chip .plus { color: var(--accent-2); font-weight: 700; }
+  .rec-chip em { font-style: normal; font-size: .68rem; color: #b9a86a; }
+
+  .legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: .72rem;
+    color: var(--muted);
+    margin: 0 0 14px 2px;
+  }
+  .legend i {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    margin-right: 5px;
+    vertical-align: -1px;
+  }
+
+  /* ===== 角色推薦流派 ===== */
+  .char-panel {
+    background: var(--panel-2);
+    border: 1px solid #2a2d38;
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+  .char-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+  .char-head h2 { margin: 0; font-size: 1rem; }
+  .char-head .sub { font-size: .78rem; color: var(--muted); }
+  details.char-panel > summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  details.char-panel > summary::-webkit-details-marker { display: none; }
+  details.char-panel > summary::after { content: "▾"; margin-left: auto; color: var(--muted); font-size: .85rem; }
+  details.char-panel[open] > summary { margin-bottom: 12px; }
+  details.char-panel[open] > summary::after { content: "▴"; }
+  details.char-panel > summary .cp-title { font-size: 1rem; font-weight: 700; }
+  details.char-panel > summary .cp-sub { font-size: .78rem; color: var(--muted); }
+  .char-strip { display: flex; gap: 8px; flex-wrap: wrap; }
+  .char-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    min-width: 92px;
+    background: var(--panel-3);
+    border: 1px solid var(--line);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 7px 11px;
+    cursor: pointer;
+    transition: .15s;
+    font-family: inherit;
+    text-align: left;
+  }
+  .char-chip:hover { border-color: #4b5160; transform: translateY(-1px); }
+  .char-chip.active { border-color: var(--accent); background: #2a1a12; }
+  .char-chip .cname { font-size: .86rem; font-weight: 700; }
+  .char-chip .crole { font-size: .67rem; color: var(--muted); }
+  .char-chip .tier {
+    font-size: .58rem;
+    font-weight: 700;
+    padding: 0 5px;
+    border-radius: 4px;
+    background: #3b4152;
+    color: #cbd2e0;
+  }
+  .char-chip .tier.t-s { background: #b45309; color: #fff; }
+  .char-chip .tier.t-a { background: #1d4ed8; color: #fff; }
+  .char-empty { margin: 10px 0 0; font-size: .82rem; color: var(--muted); }
+  .char-info { margin-top: 12px; border-top: 1px dashed #2f3541; padding-top: 12px; }
+  .char-title { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .char-title strong { font-size: 1.05rem; color: var(--accent-2); }
+  .char-title .tar { font-size: .74rem; color: var(--muted); }
+  .char-title .tagset { display: flex; gap: 6px; flex-wrap: wrap; }
+  .char-title .tg {
+    font-size: .66rem;
+    background: #26303f;
+    color: #9fb3cf;
+    border-radius: 999px;
+    padding: 1px 8px;
+  }
+  .char-mech { margin: 8px 0 0; font-size: .82rem; line-height: 1.65; color: #c3c9d6; }
+  .char-aware { margin: 6px 0 0; font-size: .78rem; color: var(--muted); }
+  .char-aware b { color: #a78bfa; }
+  .build-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(288px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .build-card {
+    display: flex;
+    flex-direction: column;
+    background: var(--panel);
+    border: 1px solid #2a2d38;
+    border-radius: 10px;
+    padding: 12px;
+  }
+  .build-card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .build-card-head h4 { margin: 0; font-size: .92rem; color: #fff; }
+  .style-tag {
+    font-size: .64rem;
+    background: #1e3a5f;
+    color: #9ec5ff;
+    border-radius: 999px;
+    padding: 1px 8px;
+  }
+  .brow { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 6px; }
+  .brow-label { flex: 0 0 54px; padding-top: 3px; font-size: .68rem; color: var(--muted); }
+  .brow-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+  .s-chip {
+    font-size: .7rem;
+    background: var(--panel-3);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 2px 7px;
+    color: #d6dae3;
+  }
+  .s-chip.dual { background: #2a1515; border-color: var(--dual); color: #fecaca; }
+  .s-chip.inh { background: #1e1533; border-color: #7c3aed; color: #ddd6fe; }
+  .build-tip { margin: 6px 0 10px; font-size: .74rem; line-height: 1.6; color: var(--muted); }
+  .apply-btn {
+    margin-top: auto;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #4b5160;
+    background: var(--panel-3);
+    color: var(--text);
+    font-size: .78rem;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .apply-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .mode-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .mode-controls .rc-label { font-size: .78rem; color: var(--muted); white-space: nowrap; }
+  .mode-segment { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; overflow: visible; }
+  .mode-segment .mode-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid var(--line); background: var(--panel-2); color: var(--muted);
+    padding: 10px 16px; font-size: .85rem; line-height: 1.5;
+    border-radius: 999px; cursor: pointer; font-family: inherit; transition: .15s; white-space: nowrap;
+    overflow: visible !important; text-overflow: clip; min-height: 44px; height: auto;
+  }
+  .mode-segment .mode-btn:hover { border-color: var(--accent); color: var(--text); }
+  .mode-segment .mode-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .next-hero { min-height: 120px; }
+</style>
+<link rel="stylesheet" href="strategy-responsive.css?v=20261108-inherit-offers">
+<link rel="stylesheet" href="compass-theme.css?v=20261108-inherit-offers">
+<link rel="stylesheet" href="ui-readability.css?v=20261017b">
+<link rel="stylesheet" href="strategy-hud.css?v=20261108-audit-fixes">
+<link rel="stylesheet" href="strategy-art.css?v=20261108-audit-fixes">
+<link rel="stylesheet" href="strategy-legacy.css?v=20261108-audit-fixes">
+</head>
+<body>
+<header>
+  <h1><span class="page-brand">蒼翼混沌效應</span> <span class="page-title">策略羅盤</span></h1>
+  <nav class="game-nav" aria-label="工具導覽"><a href="strategy-compass.html" aria-current="page">配裝模擬</a><a href="character-skills.html">角色技能樹</a></nav>
+
+</header>
+
+<main>
+  <section id="simulator" class="section active" style="display:block">
+
+    <p id="saveStatus" role="status" aria-live="polite"></p>
+
+    <details id="plannerSettings" class="char-panel char-select" aria-labelledby="plannerSettingsTitle">
+      <summary id="plannerSettingsTitle">角色與推薦設定 <span id="settingsSummary"></span></summary>
+      <div class="char-select-head">
+        <h2 id="charSelectTitle">選擇角色</h2>
+        <span class="cp-sub">選主角、兩個傳承技與成型方向</span>
+      </div>
+      <div id="legacyFilters" class="legacy-filters" role="group" aria-label="依雙傳承流派篩選人物"></div>
+      <div class="char-strip" id="charStrip"></div>
+      <div id="recControls" class="rec-strip" aria-label="推薦條件"></div>
+      <div id="charDetail"></div>
+    </details>
+
+    <nav class="play-jumps" aria-label="遊玩工具"><a class="btn btn-sm" href="#playBoard">選策略</a><a class="btn btn-sm" href="#dualProgress">看紅策進度</a></nav>
+
+    <div class="loadout-bar" id="loadoutBar" aria-label="五槽配裝"></div>
+    <div class="build-summary" id="buildSummary"></div>
+    <div class="rec-strip" id="recStrip"></div>
+    <section id="playBoard" aria-label="當前配裝選擇">
+    <details id="offer-panel" class="route-detail offer-panel"><summary>本次三選一 · 比較遊戲選項</summary>
+      <p>分別試算，不會同時加入配裝；按「選擇」才記錄。紅數含已取得，差值為剩餘前置。</p>
+      <div id="offerComparison" class="offer-comparison"></div><button type="button" class="btn btn-sm" data-action="offer-clear">清空本次選項</button>
+    </details>
+    <div class="board-caption"><h2>當前配裝</h2><span id="buildOutlookStatus" role="status" aria-live="polite">紅數試算中…</span></div>
+    <p class="board-hint">紅數含已取得；「差 N」為剩餘前置。點選記錄，再點取消。</p>
+    <div id="removalNotice" role="status"></div>
+    <div class="board-tools">
+    <div id="slotTabs" role="tablist" aria-label="策略觸發槽位" class="tabs tabs-box slot-tabs"></div>
+    <button type="button" class="btn btn-sm" data-action="undo-build">↶ 撤銷</button><a class="btn btn-sm" href="#dualProgress">紅策進度 ↓</a>
+    </div>
+    <div class="build-board" id="buildBoard"></div>
+    </section>
+    <div class="dual-progress" id="dualProgress"></div>
+    <div class="build-result" id="buildResult"></div>
+    <details id="damage-panel" class="route-detail damage-panel"><summary>傷害試算</summary>
+      <section id="damageEstimate" class="damage-estimate" aria-labelledby="damageTitle"></section>
+    </details>
+
+    <details id="rules-help" class="rules-note"><summary>規則與說明</summary>
+      <p>「可規劃 N 紅」是選下該策略後，保留現有基礎、強化、取得與傳承記錄，搜尋到的一套可同時共存方案；不是互斥路線數量的加總，也不代表遊戲上限。詳情可查看組合；不會自動選取或切換目標。</p>
+      <p>逐項紅數不受人物目標或固定值排序限制。普通／極限使用各自容量與代表路線；找不到代表路線時採有界補完，未窮盡全部變體，也不估計掉落率或刷新成本。</p>
+      <p>進階需前置；紅策取得與傳承啟用需在遊戲中確認。I 階傳承直接填入裝配，II 階需 I 階，III 階需 I、II 階實際齊備後自動生效，仍遵守互斥。毒霧／毒環／雷雲特殊紅策槽與黑市尚未完整建模；III 階一條為保守模型，逐條紅策合成前置待實機核對，搜尋不到不代表遊戲無解。</p>
+      <p>固定值推薦指標不含頻率、機率或倍率配合，非實戰傷害；人物配法為社群機制推論，非實測強度排名。</p><a href="docs/strategy-reference.md">完整規則與來源</a></details>
+  </section>
+</main>
+
+<div class="toast-stack" id="toastStack" aria-hidden="true"></div>
+<div class="node-tip" id="nodeTip" role="tooltip" hidden></div>
+
+<dialog class="modal utility-dialog" id="confirmModal" aria-labelledby="confirmTitle">
+  <div class="modal-box data-dialog game-dialog">
+    <h3 id="confirmTitle">確認</h3>
+    <p id="confirmText"></p>
+    <div class="toolbar game-dialog-actions">
+      <button type="button" class="gd-btn ghost" data-confirm="no">取消</button>
+      <button type="button" class="gd-btn danger" data-confirm="yes">確定</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog class="modal utility-dialog" id="inheritModal" aria-labelledby="inheritTitle">
+  <div class="modal-box data-dialog game-dialog picker-dialog">
+    <h3 id="inheritTitle">選擇傳承策略</h3>
+    <div class="picker-tools">
+      <label for="inheritSearch">搜尋策略</label>
+      <input type="search" id="inheritSearch" placeholder="搜尋策略或策略樹名稱">
+      <div class="picker-tiers" id="inheritTiers" role="group" aria-label="策略階級"></div>
+      <div class="picker-els" id="inheritEls"></div>
+    </div>
+    <div class="picker-grid" id="inheritGrid"></div>
+    <div class="toolbar game-dialog-actions">
+      <button type="button" class="gd-btn ghost" data-action="inherit-clear">清空此槽</button>
+      <button type="button" class="gd-btn ghost" data-action="inherit-close">關閉</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog class="modal utility-dialog" id="exportModal" aria-labelledby="exportTitle">
+  <div class="modal-box data-dialog">
+    <h3 id="exportTitle">匯出資料</h3>
+    <p style="font-size:.85rem;color:var(--muted)">複製下方內容儲存為 .json 檔案。</p>
+    <pre id="exportCode"></pre>
+    <div class="toolbar">
+      <button onclick="copyExport()">複製</button>
+      <button onclick="downloadExport()">下載 JSON</button>
+      <button onclick="closeModal()">關閉</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog class="modal utility-dialog" id="dataModal" aria-labelledby="dataTitle">
+  <div class="modal-box data-dialog">
+    <h3 id="dataTitle">數據管理</h3><p id="importStatus" role="status" aria-live="polite"></p>
+    <p style="font-size:.85rem;color:var(--muted)">資料會自動存在瀏覽器 localStorage。你可以匯出備份或匯入到其他裝置。</p>
+    <div class="toolbar" style="margin:14px 0">
+      <button onclick="exportData()">匯出 JSON</button>
+      <label style="display:inline-block">匯入 JSON<input type="file" id="importFile" onchange="importData(this)"></label>
+      <button class="btn" type="button" data-action="recover-backup">恢復覆寫前備份</button>
+      <button class="btn" type="button" data-action="download-recovery">下載原始恢復備份</button>
+      <button class="btn" type="button" data-action="download-unreadable">下載載入失敗的原始資料</button>
+      <button class="btn" onclick="resetAll()" style="color:#ef4444">重置所有資料</button>
+    </div>
+    <label for="importBuildCode">載入配裝碼或分享連結</label>
+    <textarea class="textarea" id="importBuildCode" rows="3" placeholder="貼上 BBE1. 配裝碼或分享連結" maxlength="100000"></textarea>
+    <button class="btn" type="button" data-action="import-code">載入配裝碼</button>
+    <p>載入或重置後，可用「撤銷上一步」恢復原方案；關閉頁面後不保留撤銷歷史；覆寫前的一份恢復備份會另存於此瀏覽器，無法存入時會停止覆寫。</p>
+    <div class="card" style="margin:0">
+      <h2 style="margin-top:0;font-size:.95rem">機制備忘</h2>
+      <ul style="color:var(--muted);font-size:.82rem;padding-left:18px;margin:0">
+        <li>策略依觸發方式分為五槽：<strong>普攻 / 衝刺 / 技能 / 召喚 / 傳承技</strong>。</li>
+        <li>每條策略樹由基礎 I 階 → II 階 → III 階組成。</li>
+        <li>目前一般模型檢查名稱條件與承載樹 III 階；逐條合成前置及特殊槽仍需按遊戲版本核對。</li>
+        <li>普通局內取得依紅策所屬觸發槽位規劃；傳承與特殊取得另外記錄。</li>
+      </ul>
+    </div>
+    <div class="toolbar" style="margin-top:14px;margin-bottom:0">
+      <button onclick="closeDataModal()">關閉</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog class="modal utility-dialog" id="strategyDetailModal" aria-labelledby="strategyDetailTitle">
+  <div class="modal-box"><h3 id="strategyDetailTitle">策略詳情</h3><div id="strategyDetailBody"></div>
+    <form method="dialog" class="modal-action"><button class="btn">關閉詳情</button></form></div>
+</dialog>
+<dialog class="modal utility-dialog" id="shareModal" aria-labelledby="shareTitle">
+  <div class="modal-box"><h3 id="shareTitle">分享配裝</h3>
+    <p>將配裝碼貼到「數據管理」即可載入；離線或不同裝置皆可使用同一碼。載入時按目前規則檢查。</p>
+    <label for="shareCode">配裝碼（離線亦可使用）</label><textarea class="textarea" id="shareCode" rows="4" readonly></textarea>
+    <button type="button" class="btn" data-action="share-copy" data-value="shareCode">複製配裝碼</button>
+    <div id="shareLinkRow"><label for="shareLink">分享連結（需能存取同一網站）</label><textarea class="textarea" id="shareLink" rows="3" readonly></textarea>
+      <button type="button" class="btn" data-action="share-copy" data-value="shareLink">複製連結</button></div>
+    <p id="shareStatus" role="status" aria-live="polite"></p>
+    <form method="dialog" class="modal-action"><button class="btn">關閉分享</button></form></div>
+</dialog>
+<footer>
+  <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;align-items:center">
+    <span title="遊戲版本未知；社群目錄來源 2026-10-15／17，尚未逐條實機核對">Steam／PC · 社群資料 · 規則 2026-11-08</span>
+    <button onclick="openDataModal()" style="background:transparent;border:1px solid #4b5160;color:var(--muted);padding:4px 12px;border-radius:999px;cursor:pointer;font-size:.75rem">數據管理</button>
+    <a href="docs/strategy-reference.md">規則與資料來源</a>
+    <a href="character-skills.html" style="background:transparent;border:1px solid #4b5160;color:var(--muted);padding:4px 12px;border-radius:999px;cursor:pointer;font-size:.75rem;text-decoration:none">🧩 角色技能樹</a>
+  </div>
+</footer>
+
+<script src="tactics-descriptions.js?v=20261108-audit-fixes"></script>
+<script src="player-catalogue.js?v=20261108-audit-fixes"></script>
+<script src="strategy-data.js?v=20261108-inherit-offers"></script>
+<script src="strategy-art.js?v=20261108-audit-fixes"></script>
+<script src="strategy-five-duals.js?v=20261108-audit-fixes"></script>
+<script src="strategy-five-duals-extreme.js?v=20261108-audit-fixes"></script>
+<script src="strategy-damage-data.js?v=20261108-audit-fixes"></script>
+<script src="strategy-damage.js?v=20261108-audit-fixes"></script>
+<script src="strategy-dps.js?v=20261108-audit-fixes"></script>
+<script src="strategy-damage-view.js?v=20261108-audit-fixes"></script>
+<script src="strategy-five-dual-scores.js?v=20261108-audit-fixes"></script>
+<script src="strategy-five-dual-scores-extreme.js?v=20261108-audit-fixes"></script>
+<script src="strategy-legacy.js?v=20261108-audit-fixes"></script>
+<script src="strategy-rules.js?v=20261108-inherit-offers"></script>
+<script src="strategy-outlook.js?v=20261108-inherit-offers"></script>
+<script src="strategy-outlook-view.js?v=20261108-inherit-offers"></script>
+<script src="strategy-offers.js?v=20261108-inherit-offers"></script>
+<script src="strategy-characters.js?v=20261108-inherit-offers"></script>
+<script src="strategy-session.js?v=20261108-audit-fixes"></script>
+<script src="strategy-recommendations.js?v=20261108-inherit-offers"></script>
+<script src="strategy-routes.js?v=20261108-inherit-offers"></script>
+<script src="strategy-app.js?v=20261108-inherit-offers"></script>
+</body>
+</html>

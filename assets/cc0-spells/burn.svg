@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:ns1="http://www.w3.org/1999/xlink" viewBox="-101.89180450439453 323.94738311767577 85.42813262939453 105.78043518066406" width="128" height="128"><title>burn — adapted from Magic spell icons by steefie92 (CC0)</title><defs><linearGradient ns1:href="#linearGradient4519" id="linearGradient4525" gradientUnits="userSpaceOnUse" x1="42.62185" y1="101.15931" x2="118.69841" y2="101.15931" />
+    <linearGradient id="linearGradient4519">
+      <stop style="stop-color:#ff9112;stop-opacity:0.85658914" offset="0" id="stop4515" />
+      <stop style="stop-color:#b41500;stop-opacity:0.89803922" offset="1" id="stop4517" />
+    </linearGradient>
+    <linearGradient ns1:href="#linearGradient4519" id="linearGradient4521" x1="42.62185" y1="101.15931" x2="118.69841" y2="101.15931" gradientUnits="userSpaceOnUse" />
+    </defs><g id="art"><ellipse ry="29.396887" rx="31.097778" cy="386.49146" cx="-56.210537" id="path819" style="fill:#671b1b;fill-opacity:1;stroke:none;stroke-width:0.24610604;stroke-opacity:1" />
+      <a transform="translate(-139.83776,275.55022)" style="fill:url(#linearGradient4521);fill-opacity:1" id="a823">
+        <path style="fill:url(#linearGradient4525);fill-opacity:1;stroke:#000000;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="m 72.571426,148.64434 c -36.542398,-7.50628 -44.449087,-44.6323 4.535717,-95.438983 -2.86172,19.219004 -15.136576,33.469254 -8.126488,54.428573 21.934175,-10.820239 14.47658,-24.497728 6.356821,-27.819745 26.465064,-4.266958 41.306644,42.265005 36.023704,17.115171 4.97789,-0.851885 12.27685,21.285084 2.03168,38.296834 -7.09663,11.78372 -25.032566,15.98606 -40.821434,13.41815 z" id="path817" />
+      </a>
+      <path id="path821" d="m -66.968245,344.72081 c -11.774043,16.28973 -34.999635,47.88147 -13.279566,74.95124 5.946778,2.94832 3.54793,1.72841 9.066613,3.57474 -7.534341,-11.25711 -24.827236,-21.61987 -1.208822,-59.92999 1.005286,-5.92862 3.147495,-12.24007 5.421775,-18.59599 z" style="fill:#ccf089;fill-opacity:0.22093021;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    </g></svg>

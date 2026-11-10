@@ -1,0 +1,80 @@
+/* Shared readability adjustments; keeps the existing game palette and geometry. */
+:root { --muted: #b8bfce; --action-content: #101218; }
+button, .btn, select, input[type="search"], summary, header .navlink, .bjump {
+  min-height:44px;
+}
+button, .btn { min-width:44px; }
+summary { align-content:center; cursor:pointer; }
+.build-status span, .board-caption > span, .route-controls label,
+.next-kicker, .next-goal, .next-sub, .next-steps, .route-detail,
+.route-status, .goal-label, .rt-name, .node-lock, .node-reason,
+.inh-label, .inh-status, .inherit-section p, .slot-state,
+.charbar > .hint, .chip .crole, .char-select .char-chip .crole,
+.hero .tags span, .bcount, .hint, .empty-note {
+  font-size:.875rem; line-height:1.65;
+}
+.build-node.card-node .node-name, .card p, .ntext, .nsub, .hrow2,
+.legacy-row p, .notice { font-size:.9375rem; line-height:1.7; }
+.strategy-info.btn, .summary-actions .btn, .next-moves .btn,
+.dual-actions .btn, .inh-card button, .inh-slot, .bjump,
+.toolbar .btn, .searchwrap input, .sres { font-size:.875rem; }
+.inh-card .inh-status { font-size:.875rem !important; }
+.build-status b, .stat b { font-variant-numeric:tabular-nums; }
+.build-node.card-node { min-height:48px; }
+.build-node.card-node .node-tier { display:none; }
+.build-tier-label { font-size:.875rem; }
+.build-node.card-node .verdict { padding:0; }
+.build-node.card-node .verdict:empty { display:none; }
+.build-node.card-node .node-name {
+  white-space:nowrap; overflow-wrap:normal; text-overflow:clip;
+}
+@media(min-width:769px) {
+  .loadout-bar { display:none; }
+  .build-board { grid-template-columns:repeat(auto-fit,minmax(14rem,1fr)); }
+}
+.build-node.card-node.selected { box-shadow:none; background:var(--panel-3); }
+.build-node.card-node.selected .verdict { color:var(--text); }
+.build-node.card-node.recommended { box-shadow:none; }
+.next-cta.btn, .char-select .apply-btn, header h1 .tag {
+  color:var(--action-content);
+}
+.next-cta.btn { animation:none; min-height:44px; }
+.next-cta.btn:hover, .char-select .apply-btn:hover { color:var(--action-content); }
+.next-goal { display:inline-flex; align-items:center; gap:6px; }
+.summary-tools summary, .goal-route-detail summary {
+  color:var(--muted); font-size:.875rem; padding:8px 0;
+}
+.tool-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.summary-tools { min-width:0; }
+.summary-tools[open] summary { margin-bottom:4px; }
+.summary-actions { align-items:start; }
+.next-sub p { margin:6px 0; }
+.next-sub details { margin-top:8px; }
+.next-sub details p { color:var(--text); }
+.next-steps { margin-top:2px; }
+.el-chip { min-width:44px; min-height:44px; }
+.chip .cname, .char-select .char-chip .cname { font-size:.875rem; }
+.char-avatar .tier { background:var(--panel-3); color:var(--text); }
+.community-rating-note { color:var(--muted); font-size:.875rem; line-height:1.65; }
+.hero .tier { color:var(--text); background:var(--panel-3); font-size:.875rem; }
+.sres .body { font-size:.9375rem; line-height:1.7; }
+.rt-name { max-width:12em; }
+.toolbar .btn, .inh-card button, .inh-slot { min-height:44px; height:auto; }
+header .navlink { align-items:center; }
+@media(max-width:768px) {
+  .build-summary { padding:10px 12px; gap:8px; }
+  .build-status { gap:4px 12px; }
+  .summary-actions { width:100%; gap:8px 16px; }
+  .summary-tools { flex:1; }
+  .summary-tools summary { padding-top:8px; }
+  .next-hero { padding:12px; }
+  .next-head { gap:4px; }
+  .next-goal { border:0; background:transparent; padding:0; }
+  .next-main { margin-top:4px; }
+  .next-progress { margin-top:8px; }
+  .next-hero .next-moves { margin-top:8px; }
+  .ls-name { font-size:.8125rem; }
+  .route-controls select { min-height:44px; font-size:.875rem; }
+  .hero .stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .charbar > .hint { margin-bottom:8px; }
+}

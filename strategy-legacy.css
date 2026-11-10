@@ -1,0 +1,42 @@
+/* Extend the existing graphite battle board; cyan marks a chosen goal. */
+.legacy-filters { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:12px 0 0; }
+.legacy-filters .btn { min-height:44px; height:auto; }
+.legacy-filter-count { color:var(--muted); font-size:.8rem; margin-left:auto; }
+.legacy-panel { margin-top:20px; border-top:1px solid var(--line); padding-top:16px; }
+.legacy-heading,.legacy-card-heading { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
+.legacy-heading h3 { margin:0; font-size:1.1rem; }
+.legacy-heading>span,.legacy-note { color:var(--muted); font-size:.82rem; line-height:1.7; }
+.legacy-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr)); gap:12px; }
+.legacy-card.card { min-width:0; padding:0; margin:0 0 12px; background:var(--color-base-200); border:1px solid var(--color-base-300); border-radius:var(--radius-box); box-shadow:none; }
+.legacy-card .card-body { display:flex; gap:12px; padding:18px; min-width:0; }
+.legacy-card .card-title { font-size:1rem; line-height:1.5; margin:0; }
+.legacy-card p { margin:0; font-size:.85rem; line-height:1.75; overflow-wrap:anywhere; max-width:80ch; }
+.legacy-card .badge { white-space:normal; height:auto; min-height:24px; padding-block:3px; }
+.legacy-goal.card { border-color:var(--color-info); }
+.legacy-tags { display:flex; flex-wrap:wrap; gap:6px; }
+.legacy-donors { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.legacy-donor { min-width:0; padding:12px; background:var(--color-base-100); border-radius:var(--radius-field); display:flex; flex-direction:column; gap:7px; }
+.legacy-donor strong { font-size:.9rem; }
+.legacy-donor>span { font-size:.9rem; }
+.legacy-donor small { display:block; color:var(--color-warning); font-size:.75rem; }
+.legacy-donor p,.legacy-donor>label:not(.legacy-check) { font-size:.8rem; }
+.legacy-donor .select { width:100%; min-width:0; max-width:100%; min-height:44px; height:auto; white-space:normal; }
+.legacy-talent { color:var(--muted); }
+.legacy-risk b { color:var(--color-warning); }
+.legacy-details { border-top:1px solid var(--color-base-300); padding-top:4px; }
+.legacy-details summary { cursor:pointer; min-height:44px; padding:10px 0; font-size:.85rem; }
+.legacy-details ul { margin:0 0 12px; padding-left:22px; font-size:.85rem; }
+.legacy-details a { color:var(--color-info); text-decoration:underline; text-underline-offset:3px; }
+.legacy-checklist { min-width:0; border:1px solid var(--color-base-300); border-radius:var(--radius-field); padding:10px 12px; }
+.legacy-checklist legend { font-weight:700; padding:0 4px; font-size:.9rem; }
+.legacy-check { display:flex; align-items:flex-start; gap:10px; min-height:44px; padding:10px 0; font-size:.85rem; cursor:pointer; line-height:1.6; }
+.legacy-check .checkbox { flex-shrink:0; margin-top:2px; }
+.legacy-card .card-actions { margin-top:auto; flex-wrap:wrap; }
+.legacy-card .card-actions .btn { min-height:44px; height:auto; white-space:normal; }
+@media(max-width:600px) {
+  .legacy-donors { grid-template-columns:1fr; }
+  .legacy-card .card-body { padding:14px; }
+  .legacy-filters { gap:6px; }
+  .legacy-filters .btn { padding-inline:10px; }
+  .legacy-filter-count { width:100%; margin:0; }
+}
