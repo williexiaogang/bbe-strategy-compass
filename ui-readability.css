@@ -30,7 +30,7 @@ summary { align-content:center; cursor:pointer; }
 }
 @media(min-width:769px) {
   .loadout-bar { display:none; }
-  .build-board { grid-template-columns:repeat(auto-fit,minmax(14rem,1fr)); }
+  .build-board { grid-template-columns:repeat(5,minmax(0,1fr)); }
 }
 .build-node.card-node.selected { box-shadow:none; background:var(--panel-3); }
 .build-node.card-node.selected .verdict { color:var(--text); }
