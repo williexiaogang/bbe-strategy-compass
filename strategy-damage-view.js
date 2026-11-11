@@ -48,3 +48,12 @@ function renderDamageEstimate() {
       ${result.basicBoost?`<p class="damage-note">普攻寒冷：普攻直接增傷 +${result.basicBoost}%</p>`:''}
     </details>`}`;
 }
+
+function renderTopDamage() {
+  const host = document.getElementById('topDamage');
+  if (!host) return;
+  const trial = CompassDps.trial(state, R);
+  const available = trial.available && state.selected.size > 0;
+  const value = Math.round(trial.total).toLocaleString('zh-TW');
+  host.innerHTML = `<span>估算傷害</span><strong>${available ? `約 ${value}<small>／秒</small>` : '—'}</strong>`;
+}

@@ -1,8 +1,9 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
 const c=vm.createContext({console,TextEncoder,TextDecoder,btoa,atob,URL});
-for(const file of ['strategy-data.js','strategy-rules.js','strategy-session.js','strategy-damage-data.js','strategy-damage.js','strategy-dps.js'])
+for(const file of ['strategy-data.js','strategy-rules.js','strategy-session.js','strategy-damage-data.js','strategy-damage.js','strategy-dps.js','strategy-damage-view.js'])
   vm.runInContext(fs.readFileSync(path.join(__dirname,'..',file),'utf8'),c);
+vm.runInContext(`const R=CompassRules;const topDamage={innerHTML:''};const document={getElementById(id){return id==='topDamage'?topDamage:null;}};`,c);
 const {D,R,S}=vm.runInContext('({D:CompassDps,R:CompassRules,S:CompassSession})',c);
 const close=(a,b)=>assert.ok(Math.abs(a-b)<0.00001,`${a} != ${b}`);
 const select=(state,names)=>names.forEach(name=>assert.equal(R.toggle(state,name),'',name));
@@ -156,4 +157,17 @@ test('ICD and hypothesis settings are validated and survive codes and undo',()=>
   const portable=R.restore(S.decode(S.encode(saved)).build).state.damageScenario;
   assert.equal(portable.removeSkillIcd,true);assert.equal(portable.cooldowns['n:技能光槍'],2);
   const legacy=R.restore({}).state.damageScenario;assert.deepEqual(JSON.parse(JSON.stringify(legacy.cooldowns)),{});assert.equal(legacy.splitSlime290,false);
+});
+
+test('top damage stays synchronized with the current DPS estimate',()=>{
+  const values=vm.runInContext(`(()=>{
+    state=CompassRules.empty();renderTopDamage();const empty=topDamage.innerHTML;
+    CompassRules.toggle(state,'衝刺落雷');renderTopDamage();const selected=topDamage.innerHTML;
+    state.damageScenario={rates:{'n:衝刺落雷':2}};renderTopDamage();
+    return {empty,selected,doubled:topDamage.innerHTML,expected:Math.round(CompassDps.trial(state,CompassRules).total).toLocaleString('zh-TW')};
+  })()`,c);
+  assert.ok(values.empty.includes('—'));
+  assert.ok(values.selected.includes('610'));
+  assert.ok(values.doubled.includes(values.expected));
+  assert.ok(values.doubled.includes('1,220'));
 });

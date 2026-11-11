@@ -767,12 +767,11 @@ test('live red progress retains the screenshot poison bases instead of automatic
     const unchanged=before===JSON.stringify(R.serialize(state));
     const entries=fiveDualRouteEntries().map(x=>x.d.name);
     const replacements=currentReplacementCandidates.map(x=>({duals:x.set.duals,changes:x.replacements}));
-    const replacementHtml=replacementRouteSummary();
     const canSwitchReplacement=replacements.some(x=>switchFiveDualGoal(fiveDualKey(x.duals)));
     const trial=R.restore(R.serialize(state)).state;
     for(const n of goal.steps){const reason=R.toggle(trial,n);if(reason)throw Error(n+reason);}
     for(const [slot,name] of Object.entries(goal.set.slotAssignment)){const reason=R.acquire(trial,name,slot);if(reason)throw Error(name+reason);}
-    return {count:goal.set.duals.length,changes:goal.replacements.length,entries,replacements,replacementHtml,
+    return {count:goal.set.duals.length,changes:goal.replacements.length,entries,replacements,
       canSwitchReplacement,unchanged,retained:owned.every(n=>trial.selected.has(n)),legal:recs.every(x=>!R.canSelect(state,x.name)),
       html:document.getElementById('dualProgress').innerHTML};
   })()`,context);
@@ -782,9 +781,7 @@ test('live red progress retains the screenshot poison bases instead of automatic
   for(const name of ['火精靈引爆','爆燃火彈','燃燒爆彈','燃氣毒泡','分裂史萊姆'])assert.ok(!result.entries.includes(name),name);
   assert.ok(result.replacements.length);
   assert.equal(result.canSwitchReplacement,false,'replacement references must not be selectable as an unchanged goal');
-  assert.ok(result.replacementHtml.includes('需替換 I 階基礎')&&result.replacementHtml.includes('需替換：'));
-  assert.ok(!result.replacementHtml.includes('data-action='));
-  assert.ok(!result.replacementHtml.includes(' open'));
+  assert.ok(!result.html.includes('需替換 I 階基礎'));
   assert.ok(result.html.includes('前置齊備 · 待取得'));
 });
 

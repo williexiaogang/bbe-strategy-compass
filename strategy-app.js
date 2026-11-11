@@ -469,7 +469,6 @@ function renderBuildBoard(recs) {
     data-action="slot" data-value="${s.id}">${icon(s.id)} ${s.name}</button>`).join('');
   document.getElementById('buildBoard').innerHTML = SLOTS.map(slot => {
     const filled = R.slotMap(state)[slot.id];
-    const replacements = STRATEGY_DATA.flatMap(t => t.bases).filter(b => b.slot === slot.id && R.replacement(state, b.name));
     const groups = STRATEGY_DATA.filter(t => t.bases.some(b => b.slot === slot.id) &&
       (elementFilter === 'all' || t.element === elementFilter || R.base(state, t)?.slot === slot.id)).map(tree => {
       const ownedBase = R.base(state, tree);
@@ -503,9 +502,6 @@ function renderBuildBoard(recs) {
     return `<section class="build-column ${state.slot === slot.id ? 'current-slot' : ''} ${filled ? 'slot-filled' : ''}"
       id="slot-${slot.id}" aria-labelledby="tab-${slot.id}"><h3>${icon(slot.id)} ${slot.name}
       <span class="slot-state">${filled ? '已配置' : '選擇基礎'}</span></h3>
-      ${replacements.length ? `<details id="replace-${slot.id}" class="route-detail"><summary>替換 I 階基礎（取得 II 階後鎖定）</summary>
-        <p>將取代「${esc(filled)}」，相關紅策與傳承會重新檢查。</p>
-        <div class="next-moves">${replacements.map(b => button('替換為 ' + b.name, 'replace-base', b.name)).join('')}</div></details>` : ''}
       ${groups || '<p class="empty">沒有可選策略</p>'}</section>`;
   }).join('');
   const goal = state.target && R.byName.get(state.target);
@@ -598,7 +594,6 @@ function renderNextHero(goal, plan, completed, recs) {
   } else if (recs.length) {
     if (!main) main = mode === 'character' ? currentCharacterGoal?.completion && !currentCharacterGoal.coreSteps.length
       ? '人物核心前置齊備，繼續補完五紅' : '可推進人物流派與五紅的候選' : goal ? esc(goal.name) : '可推進紅策的候選';
-    if (!sub) sub = '對照遊戲本次三選一。';
     const choices = recs.map(r => {
       const node = R.nodes.get(r.name);
       return button(slotLabel(node.slot || R.base(state,node.tree)?.slot) + ' · ' + r.name, 'recommend', r.name,
@@ -665,9 +660,9 @@ function renderAll() {
   renderBuildSummary();
   if (inheritOpen) document.querySelector('.inherit-section').open = true;
   renderBuildBoard(recs);
-  renderOfferComparison();
   if (document.getElementById('damage-panel').open) renderDamageEstimate();
   renderDualProgress(recs);
+  renderTopDamage();
   queueBuildOutlooks();
   expanded.forEach(id=>{const el=document.getElementById(id);if(el)el.open=true;});
   document.getElementById('saveStatus').textContent = notice;
@@ -695,7 +690,7 @@ function switchVisibleSlot(slot) {
 
 function commitDamage() {
   removalNotice=null;document.getElementById('removalNotice').innerHTML='';
-  sessionHistory.record(R.serialize(state));saveState();renderDamageEstimate();refreshUndoControls();
+  sessionHistory.record(R.serialize(state));saveState();renderDamageEstimate();renderTopDamage();refreshUndoControls();
 }
 
 document.addEventListener('toggle', event=>{
@@ -707,7 +702,6 @@ document.addEventListener('toggle', event=>{
 
 document.addEventListener('change', event => {
   const action=event.target.dataset?.action;
-  if(action==='offer-choice'){const index=Number(event.target.dataset.value);offerChoices[index]=event.target.value;renderOfferComparison();queueBuildOutlooks();document.getElementById('offer-'+index)?.focus({preventScroll:true});return;}
   if(action==='legacy-body') {commit(R.setLegacyBody(state,Number(event.target.dataset.value),event.target.value));return;}
   if (['legacy-check','legacy-unlock','legacy-skill'].includes(action)) {
     const goal=CompassLegacy.normalize(state.legacyBuild,currentCharacter);
@@ -771,12 +765,6 @@ document.addEventListener('click', async event => {
     state.damageScenario=scenario;commitDamage();return;
   }
   if (action === 'strategy-detail') { openStrategyDetail(value); return; }
-  if(action==='offer-clear'){offerChoices=['','',''];renderOfferComparison();queueBuildOutlooks();return;}
-  if(action==='offer-select'){
-    if(!value || state.selected.has(value)){toast('此選項已取得或已更新，請重新比較。','warn');return;}
-    const reason=R.toggle(state,value);if(reason){toast(reason,'warn');return;}
-    offerChoices=['','',''];commit('已記錄本次選擇','ok');return;
-  }
   if (action === 'outlook-deepen') { deepenOutlook(value); return; }
   if (action === 'related-red-detail') { openRelatedRedDetail(value); return; }
   if (action === 'undo-build') { undoBuild(); return; }
@@ -798,9 +786,6 @@ document.addEventListener('click', async event => {
     const cascading = !reason && (removed.length>1 || lostReds.length>0);
     commit(cascading ? `已移除 ${removed.length} 條策略、${lostReds.length} 條紅策記錄` : reason,cascading?'ok':'error',true,cascading?[...removed,...lostReds.map(x=>x.name)]:null);
     if (reason) shake(value); else pop(value);
-  } else if (action === 'replace-base') {
-    const reason = R.replaceBase(state, value);
-    commit(reason || '已替換基礎策略並重新檢查紅策與傳承', reason ? 'error' : 'ok');
   }
   else if (action === 'game-mode') { const reason = switchGameMode(value); commit(reason); }
   else if (action === 'slot') { switchVisibleSlot(value); }
@@ -877,7 +862,7 @@ document.addEventListener('click', async event => {
   else if (action === 'reset-build') {
     if ((state.selected.size || state.acquired.length || state.legacyBuild?.checks.length) && !await gameConfirm('重置本局策略、取得記錄與潛能勾選？傳承配置與雙傳承目標保留，紅策停用；可撤銷恢復。', {title:'重置配裝',ok:'確認重置'})) return;
     state.selected.clear(); state.acquired = []; state.inherited.forEach(x => { if (x) {x.confirmed = false;delete x.observed;} });
-    R.syncInherited(state);offerChoices=['','',''];
+    R.syncInherited(state);
     state.fiveDualGoal = null;
     if(state.legacyBuild) state.legacyBuild.checks=[];
     commit('已重置本局配裝，可撤銷恢復', 'ok');

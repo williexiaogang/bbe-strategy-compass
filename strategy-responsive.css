@@ -554,28 +554,15 @@ button, summary, [id] { scroll-margin-top: 100px; }
 }
 
 /* Independent, touch-friendly information controls and native modal surfaces. */
-.strategy-control { display:flex; align-items:stretch; gap:4px; width:100%; min-width:0; }
-.strategy-control .build-node { flex:1; min-width:0; }
+main { max-width:1680px; }
+.strategy-control { position:relative; width:100%; min-width:0; }
+.strategy-control .build-node { width:100%; min-width:0; padding-right:30px; }
 .strategy-control .node-outlook { align-self:flex-start; margin-top:4px; min-height:22px; height:auto; padding:1px 6px; font-size:.75rem; line-height:1.5; font-weight:400;
   color:var(--color-accent, var(--accent-2)); border-color:color-mix(in srgb,var(--color-accent, var(--accent-2)) 35%,transparent); white-space:nowrap; }
 .strategy-control .node-outlook[aria-busy="true"] { color:var(--muted); border-color:var(--line); }
 .outlook-detail { padding:12px; margin:12px 0; border:1px solid var(--line); border-radius:6px; }
 .outlook-detail h4 { margin:0 0 8px; }
 .outlook-detail small { display:block; color:var(--muted); margin-top:6px; }
-.board-hint { margin:0 0 12px; color:var(--muted); font-size:.8rem; line-height:1.6; }
-.offer-panel { padding:12px; border:1px solid var(--line); margin-bottom:16px; background:var(--panel); }
-.offer-panel p { color:var(--muted); font-size:.85rem; line-height:1.6; }
-.offer-advice { padding:10px 12px; border-left:3px solid var(--accent); background:var(--panel-2); line-height:1.6; }
-.offer-advice strong, .offer-advice span { display:block; }
-.offer-comparison { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:12px 0; }
-.offer-card { padding:12px; border:1px solid var(--line); gap:10px; min-width:0; }
-.offer-card.recommended { border-color:var(--accent-2); }
-.offer-card .offer-decision { color:var(--text); }
-.offer-decision strong { color:var(--accent-2); }
-.offer-card select { width:100%; max-width:100%; background:var(--panel-2); }
-.offer-pick { height:auto; min-height:64px; display:flex; flex-direction:column; white-space:normal; }
-.offer-card .node-outlook { height:auto; white-space:normal; flex-wrap:wrap; }
-@media(max-width:768px){.offer-comparison {grid-template-columns:minmax(0,1fr);}}
 #plannerSettings > summary { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
 #settingsSummary { font-size:.8rem; color:var(--muted); font-weight:400; }
 .board-tools { position:sticky; top:calc(var(--header-height,110px) + var(--red-progress-height,170px)); z-index:30; display:flex; flex-wrap:wrap; gap:6px; padding:8px 0; background:var(--bg,var(--panel)); margin-bottom:12px; }
@@ -588,9 +575,9 @@ button, summary, [id] { scroll-margin-top: 100px; }
   .build-node { scroll-margin-top:calc(var(--header-height,110px) + var(--red-progress-height,170px) + 110px); }
 }
 .damage-panel { margin-top:20px; }
-.compact-help { font-size:.8rem; color:var(--muted); }
-.strategy-info { flex:0 0 40px; align-self:center; display:grid; place-items:center; width:40px; min-width:40px; min-height:44px; height:44px; padding:0; background:transparent; color:var(--muted); border:0; border-radius:50%; font-family:inherit; font-size:1.05rem; cursor:pointer; }
-.strategy-info:hover, .strategy-info:focus-visible { color:var(--text); background:var(--panel-3); }
+.strategy-info { position:absolute; top:2px; right:2px; z-index:2; display:grid; place-items:center; width:28px; min-width:28px; min-height:28px; height:28px; padding:0; background:transparent; color:var(--muted); border:0; border-radius:50%; font-family:inherit; font-size:.8rem; cursor:pointer; opacity:.65; }
+.strategy-info::before { content:''; position:absolute; inset:-8px; }
+.strategy-info:hover, .strategy-info:focus-visible { color:var(--text); background:var(--panel-3); opacity:1; }
 .utility-dialog { padding:0; border:0; background:transparent; color:var(--text); }
 .utility-dialog::backdrop { background:rgba(0,0,0,.75); }
 .utility-dialog .modal-box { width:min(700px,calc(100vw - 32px)); max-width:700px; max-height:85dvh; padding:24px; background:var(--panel); color:var(--text); border:1px solid var(--accent); border-radius:4px; overflow:auto; }
@@ -672,10 +659,6 @@ button, summary, [id] { scroll-margin-top: 100px; }
 .base-direction small,.related-red-row small { color:var(--muted); font-size:.78rem; line-height:1.6; }
 .base-direction .btn,.related-red-row .btn { min-height:44px; height:auto; white-space:normal; }
 .related-red-list { margin:6px 0 12px; padding:0 12px; border:1px solid var(--line); border-radius:6px; }
-.replacement-red-routes > p { color:var(--muted); font-size:.8rem; line-height:1.65; }
-.replacement-route { padding:12px; border:1px solid var(--line); border-radius:6px; margin:8px 0; overflow-wrap:anywhere; }
-.replacement-route strong { color:var(--text); font-size:.86rem; }
-.replacement-route p,.replacement-route small { color:var(--muted); font-size:.8rem; line-height:1.65; }
 .inherit-hint { margin-top:4px; color:var(--accent-2) !important; }
 /* Multi-red ordered operating checklist (added 2026-11-04). */
 .mr-guide { margin:0 0 14px; border:1px solid color-mix(in srgb,var(--accent-2) 35%,var(--line));
@@ -712,6 +695,9 @@ button, summary, [id] { scroll-margin-top: 100px; }
 .mr-step .btn { flex:0 0 auto; }
 .dual-progress { position:sticky; top:var(--header-height,110px); z-index:40; clip-path:none; padding:10px 12px 12px; border-radius:0 0 8px 8px; box-shadow:0 10px 24px rgba(0,0,0,.28); }
 .dual-progress .panel-heading h2 { margin-bottom:8px; }
+.top-damage { display:flex; align-items:baseline; gap:7px; margin:0 8px 8px auto; color:var(--muted); font-size:.75rem; white-space:nowrap; }
+.top-damage strong { color:var(--accent-2); font-size:1.15rem; font-variant-numeric:tabular-nums; }
+.top-damage small { margin-left:3px; font-size:.72rem; font-weight:400; }
 .red-badges { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; align-items:stretch; }
 .red-badge { --red-strength:35%; --red-blend:color-mix(in oklab,var(--red-primary),var(--red-secondary));
   --red-spectrum:linear-gradient(105deg,var(--red-primary),var(--red-blend) 50%,var(--red-secondary));

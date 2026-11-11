@@ -186,7 +186,7 @@ function renderFiveDualProgress() {
   const directionKeys = new Set(directions.map(x => fiveDualKey(x.candidate.set.duals)));
   const alternatives = damagePriority ? [] : currentFiveDualCandidates.filter(x => fiveDualKey(x.set.duals) !== key && !directionKeys.has(fiveDualKey(x.set.duals)));
   document.getElementById('dualProgress').innerHTML = `
-    <div class="panel-heading"><h2>紅策進度 <span class="dp-total">當前${goal ? goal.set.duals.length + ' 紅' : '五紅'}方案</span></h2></div>
+    <div class="panel-heading"><h2>紅策進度 <span class="dp-total">當前${goal ? goal.set.duals.length + ' 紅' : '五紅'}方案</span></h2><div id="topDamage" class="top-damage" aria-live="polite"></div></div>
     ${multiRedGuide()}
     <div class="red-badges">${fiveDualRouteEntries().sort((a,b) => SLOTS.findIndex(s => s.id === a.plan.slot) - SLOTS.findIndex(s => s.id === b.plan.slot)).map(({ d, plan }) => {
       return redProgressBadge(d, plan, choices);
@@ -196,17 +196,9 @@ function renderFiveDualProgress() {
       ${directions.map(({name,slot,candidate}) => `<div class="base-direction"><div><strong>${esc(slotLabel(slot))} · ${esc(name)}</strong><span>同樣 ${candidate.set.duals.length} 紅 · 尚缺 ${candidate.missing} 條前置</span><small>改走：${candidate.set.duals.filter(n => !goal.set.duals.includes(n)).map(esc).join('、') || '相同紅策的其他前置路線'}</small></div>
         ${button('查看此方向','five-dual-goal',fiveDualKey(candidate.set.duals))}</div>`).join('')}</section>` : ''}
     ${relatedRedRoutes(goal)}
-    ${replacementRouteSummary()}
     ${alternatives.length ? `<details id="five-dual-alternatives" class="route-detail"><summary>替代紅策方案 · 切換後才更新推薦</summary>
       ${alternatives.map(x => `<p>${esc(x.set.duals.join('、'))} · 尚缺 ${x.missing} 條前置
         ${button('切換至此紅策方案', 'five-dual-goal', fiveDualKey(x.set.duals))}</p>`).join('')}</details>` : ''}`;
-}
-
-function replacementRouteSummary() {
-  const candidates = currentReplacementCandidates.filter(x => x.set.duals.length >= (currentFiveDualGoal?.set.duals.length || 0));
-  if (!candidates.length) return '';
-  return `<details id="replacement-red-routes" class="route-detail replacement-red-routes"><summary>需替換 I 階基礎的其他方案</summary>
-    ${candidates.slice(0,3).map(x=>`<div class="replacement-route"><strong>替換後可規劃 ${x.set.duals.length} 紅</strong><p>需替換：${x.replacements.map(change=>`${esc(change.from)} → ${esc(change.to)}`).join('；')}</p><small>${x.set.duals.map(esc).join('、')}</small></div>`).join('')}</details>`;
 }
 
 // All individually legal red routes tied to an already chosen tree are useful
@@ -260,7 +252,7 @@ function renderDualProgress(recs = []) {
   const shown = character ? entries : showAllDuals ? entries : state.target ? entries.filter(x => x.d.name === state.target) : related.slice(0,5);
   document.getElementById('dualProgress').innerHTML = `
     <div class="panel-heading"><h2>紅策進度 <span class="dp-total">${character ? '人物核心與五紅補完' : ''}</span></h2>
-    ${characterMode ? '' : button(showAllDuals ? '收起' : '更多路線', 'all-duals', '')}</div>
+    <div id="topDamage" class="top-damage" aria-live="polite"></div>${characterMode ? '' : button(showAllDuals ? '收起' : '更多路線', 'all-duals', '')}</div>
     <div class="red-badges">${shown.sort((a,b) => SLOTS.findIndex(s => s.id === a.plans[0].slot) - SLOTS.findIndex(s => s.id === b.plans[0].slot))
       .map(({d,plans}) => redProgressBadge(d, plans[0], shared, character ? character.build.duals.includes(d.name) ? '核心' : '補完' : '')).join('')
       || '<p class="empty">選擇人物流派或基礎策略，查看紅策目標。</p>'}</div>`;
