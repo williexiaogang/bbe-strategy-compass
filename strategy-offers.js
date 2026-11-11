@@ -1,24 +1,5 @@
 /* Temporary game offers are previews; only the explicit selection records one. */
 let offerChoices = ['', '', ''];
-const PLAY_VIEW_KEY = 'bbe_play_view';
-let playView = 'compact';
-try {
-  const saved = localStorage.getItem(PLAY_VIEW_KEY);
-  if (['compact', 'full'].includes(saved)) playView = saved;
-} catch {}
-
-function applyPlayView() {
-  document.body.dataset.playView = playView;
-  document.querySelectorAll('[data-action="play-view"]').forEach(control => {
-    control.setAttribute('aria-pressed', String(control.dataset.value === playView));
-  });
-}
-function setPlayView(value) {
-  if (!['compact', 'full'].includes(value)) return;
-  playView = value;
-  try { localStorage.setItem(PLAY_VIEW_KEY, playView); } catch {}
-  applyPlayView();
-}
 
 function renderOfferComparison() {
   const host = document.getElementById('offerComparison');

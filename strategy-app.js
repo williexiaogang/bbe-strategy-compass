@@ -410,11 +410,10 @@ function openRelatedRedDetail(name) {
   const key = name + '|' + plan.slot;
   redFillPlans.set(key,{slot:plan.slot,steps:[...plan.steps]});
   hideTip();
-  document.getElementById('strategyDetailTitle').textContent = name + ' · 其他可行路線';
-  document.getElementById('strategyDetailBody').innerHTML = redRecipe(dual) +
-    '<p class="tip-meta">此處預覽單條紅策路線，不會切換當前整套方案。</p>' +
-    routeTrack(dual,plan,R.frontier(state,plan.steps)) + `<div class="red-effect"><h4>策略效果</h4><p>${esc(dual.desc)}</p></div>` +
-    `<div class="red-fill">${button('加入裝配規劃','plan-red',key)}<small>只加入規劃清單，不改變本局取得或傷害。實際取得後可從規劃清單另行填入記錄。</small></div>`;
+  document.getElementById('strategyDetailTitle').textContent = name;
+  document.getElementById('strategyDetailBody').innerHTML = redRecipe(dual) + redRouteSummary(plan) +
+    `<div class="red-effect"><p>${esc(dual.desc)}</p></div>` +
+    `<div class="red-fill">${button('加入裝配規劃','plan-red',key)}</div>`;
   openDialog('strategyDetailModal');
 }
 
@@ -658,7 +657,6 @@ function renderNextHero(goal, plan, completed, recs) {
 }
 
 function renderAll() {
-  applyPlayView();
   const focused = document.activeElement;
   const focusKey = focused?.dataset?.action && [focused.dataset.action, focused.dataset.value];
   const focusId = focused?.id;
@@ -707,6 +705,9 @@ function commitDamage() {
 
 document.addEventListener('toggle', event=>{
   if(event.target.id==='damage-panel' && event.target.open)renderDamageEstimate();
+  if(event.target.classList?.contains('red-badge') && event.target.open) {
+    document.querySelectorAll('.red-badge[open]').forEach(badge=>{if(badge!==event.target)badge.open=false;});
+  }
 },true);
 
 document.addEventListener('change', event => {
@@ -756,6 +757,7 @@ document.addEventListener('change', event => {
 });
 
 document.addEventListener('click', async event => {
+  if (!event.target.closest('.red-badge')) document.querySelectorAll('.red-badge[open]').forEach(badge=>{badge.open=false;});
   const target = event.target.closest('[data-action]');
   if (!target) return;
   const { action, value } = target.dataset;
@@ -774,7 +776,6 @@ document.addEventListener('click', async event => {
     state.damageScenario=scenario;commitDamage();return;
   }
   if (action === 'strategy-detail') { openStrategyDetail(value); return; }
-  if (action === 'play-view') { setPlayView(value); return; }
   if(action==='offer-clear'){offerChoices=['','',''];renderOfferComparison();queueBuildOutlooks();return;}
   if(action==='offer-select'){
     if(!value || state.selected.has(value)){toast('此選項已取得或已更新，請重新比較。','warn');return;}
@@ -998,4 +999,7 @@ state.character=currentCharacter;sessionHistory.reset(R.serialize(state));
 new ResizeObserver(entries=>{
   document.documentElement.style.setProperty('--header-height',entries[0].target.getBoundingClientRect().height+'px');
 }).observe(document.querySelector('header'));
+new ResizeObserver(entries=>{
+  document.documentElement.style.setProperty('--red-progress-height',entries[0].target.getBoundingClientRect().height+'px');
+}).observe(document.getElementById('dualProgress'));
 renderAll();

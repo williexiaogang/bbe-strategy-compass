@@ -179,7 +179,7 @@ ui-readability.css 是策略頁與角色頁共用的閱讀／操作調整，沿�
 
 角色頁先顯示身份再顯示來源，推薦級別明確標記「社群推薦」。主按鈕改用深色文字，實測橙底對比約 6.6:1，弱化文字／面板約 7.9:1；尚未做整頁完整無障礙稽核。本次只按現行 SKILL、程式與瀏覽器實測調整，不參考過期 audit report。
 
-index.html 為入口；strategy-compass.html 為唯一策略頁；strategy-compass-mobile.html 只轉向共用頁，保留查詢參數與片段。strategy-data.js 為共用目錄；strategy-rules.js 為規則；strategy-app.js／strategy-characters.js 為介面；strategy-session.js 為方案歷史與配裝碼編解碼；strategy-responsive.css 為自適應樣式；tests/strategy-rules.test.cjs 驗證規則與資料往返。角色技能頁與 character-data.js 繼續獨立。
+index.html 為入口；strategy-compass.html 為唯一策略頁。strategy-data.js 為共用目錄；strategy-rules.js 為規則；strategy-app.js／strategy-characters.js 為介面；strategy-session.js 為方案歷史與配裝碼編解碼；strategy-responsive.css 為自適應樣式；tests/strategy-rules.test.cjs 驗證規則與資料往返。角色技能頁與 character-data.js 繼續獨立。
 
 ## 二、七系策略樹速查
 
@@ -465,7 +465,7 @@ index.html 為入口；strategy-compass.html 為唯一策略頁；strategy-compa
 
 ### 2026-10-18：紅策進度徽章
 
-紅策進度移至推薦區下方、當前配裝上方。五紅與人物推薦使用同一組可展開徽章，依普攻、技能、衝刺、傳承技、召喚排序。徽章區不再重複列出可選推薦；預設只顯示名稱、承載槽位、前置分段與取得／傳承狀態。點開後保留各樹並行、樹內按階級解鎖的路線與效果；前置齊備仍須在遊戲中取得後確認。人物目標取得後保留徽章，取得記錄管理預設收起、無記錄時隱藏。
+紅策進度固定於頁首下方。五紅與人物推薦使用同一組徽章，依普攻、技能、衝刺、傳承技、召喚排序；預設顯示名稱、精簡來源、承載槽位、前置分段與取得／傳承狀態。來源尚未選定時顯示策略樹名稱，選定後顯示具體策略名稱。點擊徽章以浮窗查看取得條件、剩餘前置與效果，不展開或移動原有卡片。人物目標取得後保留徽章，取得記錄管理預設收起、無記錄時隱藏。
 
 ### 2026-10-18：遊戲 HUD 介面整理
 

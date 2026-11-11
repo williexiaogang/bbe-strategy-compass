@@ -122,7 +122,7 @@ test('five-red status distinguishes prerequisites from confirmed acquisition', (
   const ready = vm.runInContext(`state=R.empty();state.recommendMode='five-dual';state.fiveDualSort='power4';getFiveDualRecommendations();const chosen=currentFiveDualGoal.set;for(const n of currentFiveDualGoal.steps)R.toggle(state,n);getFiveDualRecommendations();renderNextHero(null,null,false,[]);`, context);
   assert.ok(ready.includes('五紅前置齊備，待取得或確認啟用'));
   const badges = vm.runInContext(`renderFiveDualProgress();document.getElementById('dualProgress').innerHTML;`, context);
-  assert.ok(badges.includes('遊戲中取得後確認'));
+  assert.ok(badges.includes('取得後確認'));
   assert.equal((badges.match(/data-status="ready"/g)||[]).length,5);
   assert.equal((badges.match(/data-status="complete"/g)||[]).length,0);
   const done = vm.runInContext(`for(const [slot,name] of Object.entries(chosen.slotAssignment))R.acquire(state,name,slot);getFiveDualRecommendations();renderNextHero(null,null,false,[]);`, context);
@@ -141,7 +141,7 @@ test('character build choice survives portable codes and undo', () => {
   assert.deepEqual([...result], [2, 2]);
 });
 
-test('five-red build, hero and route highlights share all currently legal candidates', () => {
+test('five-red build, hero and compact route summaries share the current plan', () => {
   const result = vm.runInContext(`(() => {
     state=R.empty();state.recommendMode='five-dual';state.fiveDualSort='power4';
     const recs=getFiveDualRecommendations();renderFiveDualProgress();
@@ -152,13 +152,11 @@ test('five-red build, hero and route highlights share all currently legal candid
   assert.equal(result.entries.length, 5);
   assert.deepEqual([...result.entries].sort(), [...result.duals].sort());
   const recommended = [...result.html.matchAll(/data-action="recommend" data-value="([^"]+)"/g)].map(m => m[1]);
-  assert.deepEqual(recommended, []); // Choices appear once in the hero; badges disclose their prerequisite highlights.
+  assert.deepEqual(recommended, []);
   const heroChoices = [...result.hero.matchAll(/data-action="recommend" data-value="([^"]+)"/g)].map(m => m[1]);
   assert.deepEqual(heroChoices, [...result.names]);
   assert.ok(!result.hero.includes('選擇此策略'));
-  const gold = [...result.html.matchAll(/class="rt-node next"[\s\S]*?<span class="rt-name">([^<]+)<\/span>/g)].map(m => m[1]);
-  assert.ok(gold.length > 0);
-  assert.deepEqual([...new Set(gold)].sort(), [...result.names].sort());
+  assert.equal((result.html.match(/class="red-route-summary"/g) || []).length, 5);
   assert.ok(!result.html.includes('data-action="target"'));
   assert.ok(result.hero.includes('每次選擇後重新計算'));
 });
@@ -263,6 +261,22 @@ test('five-red route keeps acquired and inherited targets visible with accurate 
   assert.equal((html.match(/data-status="pending"/g) || []).length, 1);
   assert.ok(html.includes('已取得'));
   assert.ok(html.includes('傳承待啟用'));
+});
+
+test('red badges show a chosen tactic name and keep route detail in a floating panel', () => {
+  const result = vm.runInContext(`(() => {
+    state=R.empty();
+    const d=R.byName.get('爆燃火彈'),plan=R.plans(state,d)[0];
+    const initial=redProgressBadge(d,plan,[]);
+    state.selected.add('技能火彈');
+    const chosen=redProgressBadge(d,plan,[]);
+    return {initial,chosen};
+  })()`, context);
+  assert.ok(result.initial.includes('<span>火彈</span>'));
+  assert.ok(result.chosen.includes('<span>技能火彈</span>'));
+  assert.ok(result.chosen.includes('class="red-badge-detail"'));
+  assert.ok(!result.chosen.includes('class="route-track"'));
+  assert.ok(!result.chosen.includes('尚未逐版本實機核對'));
 });
 
 test('five-red goal persists in backups and rejects malformed goal keys', () => {
@@ -464,31 +478,6 @@ test('damage priority completes bases outside representative presets without rep
   assert.ok(result.count>0);assert.ok(result.owned);
   assert.ok(result.hero.includes('保留現有配裝'));
   assert.ok(!result.html.includes('未自動改換目標'));
-});
-
-test('red routes display independent strategy trees before a shared red result', () => {
-  const result=vm.runInContext(`(() => {
-    state=R.empty();getFiveDualRecommendations();
-    const {d,plan}=fiveDualRouteEntries()[0];
-    const html=routeTrack(d,plan);
-    return {html, trees:new Set(plan.steps.map(n=>R.nodes.get(n).tree)).size};
-  })()`,context);
-  assert.ok(result.trees>=2);
-  assert.equal((result.html.match(/class="rt-branch"/g)||[]).length,result.trees);
-  assert.ok(result.html.includes('各樹可並行推進'));
-  assert.ok(result.html.indexOf('rt-result')>result.html.indexOf('rt-branches'));
-  assert.ok(!result.html.includes('<ol class="route-track"'));
-});
-
-test('extreme parallel II choices do not imply that III requires both branches', () => {
-  const html=vm.runInContext(`(() => {
-    state=R.empty();state.gameMode='extreme';
-    const d=DUALS.find(d=>[...d.prim,...d.sec].includes('普攻寒冷'));
-    return routeTrack(d,{slot:'basic',steps:['普攻寒冷','寒氣爆發','聚寒成冰','強力破冰']});
-  })()`,context);
-  assert.match(html,/data-tier="2"[\s\S]*?II 階並列策略[\s\S]*?寒氣爆發[\s\S]*?聚寒成冰[\s\S]*?data-tier="3"/);
-  assert.ok(html.includes('需先選：聚寒成冰'));
-  assert.ok(!html.includes('需先選：寒氣爆發'));
 });
 
 test('a finished character core continues into five-red completion without replacing its bases', () => {

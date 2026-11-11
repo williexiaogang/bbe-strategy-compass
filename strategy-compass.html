@@ -928,7 +928,7 @@
   .mode-segment .mode-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
   .next-hero { min-height: 120px; }
 </style>
-<link rel="stylesheet" href="strategy-responsive.css?v=20261111-play-view">
+<link rel="stylesheet" href="strategy-responsive.css?v=20261111-red-dock">
 <link rel="stylesheet" href="compass-theme.css?v=20261108-inherit-offers">
 <link rel="stylesheet" href="ui-readability.css?v=20261111-compact-info">
 <link rel="stylesheet" href="strategy-hud.css?v=20261108-audit-fixes">
@@ -946,6 +946,7 @@
   <section id="simulator" class="section active" style="display:block">
 
     <p id="saveStatus" role="status" aria-live="polite"></p>
+    <div class="dual-progress" id="dualProgress"></div>
 
     <details id="plannerSettings" class="char-panel char-select" aria-labelledby="plannerSettingsTitle">
       <summary id="plannerSettingsTitle">角色與推薦設定 <span id="settingsSummary"></span></summary>
@@ -959,27 +960,22 @@
       <div id="charDetail"></div>
     </details>
 
-    <nav class="play-jumps" aria-label="遊玩工具"><div class="view-switch" role="group" aria-label="顯示模式"><button type="button" class="btn btn-sm" data-action="play-view" data-value="compact" aria-pressed="true">局內精簡</button><button type="button" class="btn btn-sm" data-action="play-view" data-value="full" aria-pressed="false">完整規劃</button></div><a class="btn btn-sm" href="#playBoard">選策略</a><a class="btn btn-sm" href="#dualProgress">看紅策進度</a></nav>
-
     <div class="loadout-bar" id="loadoutBar" aria-label="五槽配裝"></div>
     <div class="build-summary" id="buildSummary"></div>
     <div class="rec-strip" id="recStrip"></div>
     <section id="playBoard" aria-label="當前配裝選擇">
     <details id="offer-panel" class="route-detail offer-panel" open><summary>本次三選一 · 比較遊戲選項</summary>
-      <p>分別試算，不會同時加入配裝；按「選這個」才記錄。紅數含已取得，差值為剩餘前置。</p>
       <div id="offerAdvice" class="offer-advice" role="status" aria-live="polite"></div>
       <div id="offerComparison" class="offer-comparison"></div><button type="button" class="btn btn-sm" data-action="offer-clear">清空本次選項</button>
     </details>
     <div class="board-caption"><h2>當前配裝</h2><span id="buildOutlookStatus" role="status" aria-live="polite">紅數試算中…</span></div>
-    <p class="board-hint">紅數含已取得；「差 N」為剩餘前置。點選記錄，再點取消。</p>
     <div id="removalNotice" role="status"></div>
     <div class="board-tools">
     <div id="slotTabs" role="tablist" aria-label="策略觸發槽位" class="tabs tabs-box slot-tabs"></div>
-    <button type="button" class="btn btn-sm" data-action="undo-build">↶ 撤銷</button><a class="btn btn-sm" href="#dualProgress">紅策進度 ↓</a>
+    <button type="button" class="btn btn-sm" data-action="undo-build">↶ 撤銷</button>
     </div>
     <div class="build-board" id="buildBoard"></div>
     </section>
-    <div class="dual-progress" id="dualProgress"></div>
     <div class="build-result" id="buildResult"></div>
     <details id="damage-panel" class="route-detail damage-panel"><summary>傷害試算</summary>
       <section id="damageEstimate" class="damage-estimate" aria-labelledby="damageTitle"></section>
@@ -1107,11 +1103,11 @@
 <script src="strategy-rules.js?v=20261108-inherit-offers"></script>
 <script src="strategy-outlook.js?v=20261108-inherit-offers"></script>
 <script src="strategy-outlook-view.js?v=20261111-compact-info"></script>
-<script src="strategy-offers.js?v=20261111-play-view"></script>
+<script src="strategy-offers.js?v=20261111-red-dock"></script>
 <script src="strategy-characters.js?v=20261108-inherit-offers"></script>
 <script src="strategy-session.js?v=20261108-audit-fixes"></script>
 <script src="strategy-recommendations.js?v=20261108-inherit-offers"></script>
-<script src="strategy-routes.js?v=20261108-inherit-offers"></script>
-<script src="strategy-app.js?v=20261111-play-view"></script>
+<script src="strategy-routes.js?v=20261111-red-dock"></script>
+<script src="strategy-app.js?v=20261111-red-dock"></script>
 </body>
 </html>

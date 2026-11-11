@@ -58,7 +58,6 @@ summary { align-content:center; cursor:pointer; }
 .community-rating-note { color:var(--muted); font-size:.875rem; line-height:1.65; }
 .hero .tier { color:var(--text); background:var(--panel-3); font-size:.875rem; }
 .sres .body { font-size:.9375rem; line-height:1.7; }
-.rt-name { max-width:12em; }
 .toolbar .btn, .inh-card button, .inh-slot { min-height:44px; height:auto; }
 header .navlink { align-items:center; }
 @media(max-width:768px) {

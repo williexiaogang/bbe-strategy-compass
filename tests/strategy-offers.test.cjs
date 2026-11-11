@@ -4,40 +4,15 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
 
-const controls = ['compact', 'full'].map(value => ({
-  dataset: { value },
-  setAttribute(name, value) { this[name] = value; }
-}));
 const elements = new Map();
-const storage = new Map();
-const context = vm.createContext({
-  console,
-  elements,
-  controls,
-  localStorage: {
-    getItem: key => storage.get(key) || null,
-    setItem: (key, value) => storage.set(key, value)
-  }
-});
+const context = vm.createContext({ console, elements });
 for (const file of ['strategy-data.js', 'strategy-rules.js', 'strategy-five-duals.js'])
   vm.runInContext(fs.readFileSync(path.join(__dirname, '..', file), 'utf8'), context);
 vm.runInContext(`const R=CompassRules,DUALS=CompassData.DUALS,TIER_LABEL=['','I','II','III'];
   let state=R.empty(),currentCharacter=null,currentFiveDualGoal=null,currentCharacterGoal=null;
   const esc=String,slotLabel=String,button=(label)=>'<button>'+label+'</button>';`, context);
-vm.runInContext(`const document={body:{dataset:{}},getElementById(id){if(!elements.has(id))elements.set(id,{innerHTML:''});return elements.get(id);},
-  querySelectorAll(selector){return selector==='[data-action="play-view"]'?controls:[];}};`, context);
+vm.runInContext(`const document={getElementById(id){if(!elements.has(id))elements.set(id,{innerHTML:''});return elements.get(id);}};`, context);
 vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'strategy-offers.js'), 'utf8'), context);
-
-test('compact and full play views update controls and persist only the display preference', () => {
-  assert.equal(vm.runInContext('playView', context), 'compact');
-  vm.runInContext("setPlayView('full')", context);
-  assert.equal(vm.runInContext('document.body.dataset.playView', context), 'full');
-  assert.equal(storage.get('bbe_play_view'), 'full');
-  assert.deepEqual(controls.map(control => control['aria-pressed']), ['false', 'true']);
-  vm.runInContext("setPlayView('compact');setPlayView('invalid')", context);
-  assert.equal(vm.runInContext('document.body.dataset.playView', context), 'compact');
-  assert.deepEqual(controls.map(control => control['aria-pressed']), ['true', 'false']);
-});
 
 test('offer advice identifies a choice that advances the current five-red plan', () => {
   const result = vm.runInContext(`(()=>{

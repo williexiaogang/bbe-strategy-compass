@@ -2,53 +2,17 @@
 const redFillPlans = new Map();
 
 function redRecipe(dual) {
-  const group = names => names.length > 1 ? `${names.map(esc).join(' <b>或</b> ')} <small>（任一）</small>` : names.map(esc).join('');
-  return `<div class="red-recipe" aria-label="普通取得條件">
-    <h4>普通取得條件（目前模型）</h4><p><span>主條件</span>${group(dual.prim)}</p><p><span>次條件</span>${group(dual.sec)}</p>
-    ${(dual.need || []).length ? `<p><span>額外條件</span>${dual.need.map(esc).join(' ＋ ')} <small>（全部需要）</small></p>` : ''}
-    <p class="rt-guide">主、次條件需同時滿足；同一列標示「或」的策略只選其一。目前模型另要求承載樹 III 階；逐條合成前置仍須核對遊戲圖鑑。</p></div>`;
+  const group = names => names.map(esc).join(' <b>或</b> ');
+  return `<div class="red-recipe" aria-label="取得條件">
+    <p><span>條件</span>${group(dual.prim)} <b>＋</b> ${group(dual.sec)}</p>
+    ${(dual.need || []).length ? `<p><span>額外</span>${dual.need.map(esc).join(' ＋ ')}</p>` : ''}</div>`;
 }
-function routeTrack(dual, plan, nextNames = R.frontier(state, plan.steps)) {
-  const recommended = new Set(nextNames || []);
-  const trees = new Set([...dual.prim, ...dual.sec, ...(dual.need || []), ...plan.steps, ...R.hosts(dual).filter(h => R.nodes.get(h)?.slot === plan.slot)]
-    .map(n => R.nodes.get(n)?.tree).filter(Boolean));
-  const owned = [...state.selected].filter(n => trees.has(R.nodes.get(n)?.tree) && !plan.steps.includes(n))
-    .sort((a, b) => R.nodes.get(a).level - R.nodes.get(b).level);
-  const node = (name, cls) => {
-    const info = R.nodes.get(name);
-    const el = info && elementOf(info.tree.element);
-    const reason = cls === 'done' ? '' : R.canSelect(state, name);
-    const status = cls === 'done' ? '已選擇' : reason ? '未解鎖 · ' + reason : cls === 'next' ? '建議下一步' : '目前可選';
-    return `<li class="rt-node ${cls}" data-state="${reason ? 'locked' : cls}" style="${el ? `--el:${el.color}` : ''}" title="${esc(name + ' · ' + status)}" aria-label="${esc(name + ' · ' + status)}">
-      <span class="rt-dot">${info ? TIER_LABEL[info.level] : ''}</span><span class="rt-name">${esc(name)}</span></li>`;
-  };
-  const names = [...new Set([...owned, ...plan.steps])];
-  const branches = [...trees].map(tree => {
-    const levels = [1, 2, 3].map(level => names.filter(n => R.nodes.get(n)?.tree === tree && R.nodes.get(n).level === level));
-    if (!levels.some(level => level.length)) return '';
-    const prerequisites = name => {
-      const base = levels[0][0];
-      if (!base) return '';
-      const valid = tree.ii.filter(ii => !R.canSelect({ ...state, selected: new Set([base, ii]) }, name));
-      return valid.length === tree.ii.length ? '任一 II 階後可選' : '需先選：' + valid.join('／');
-    };
-    return `<section class="rt-branch" aria-label="${esc(tree.name)} 策略樹">
-      <div class="rt-branch-title">${esc(tree.name)}</div>
-      <div class="rt-stages">${levels.map((level, i) => level.length ? `<div class="rt-stage" data-tier="${i + 1}">
-        <span class="rt-stage-label">${TIER_LABEL[i + 1]} 階${i === 0 ? ' · 基礎' : i === 1 ? ' · 強化' : ' · 進階'}</span><ul class="rt-tier" aria-label="${TIER_LABEL[i + 1]} 階${level.length > 1 ? '並列策略' : ''}">${level.map(n => node(n, state.selected.has(n) ? 'done' : recommended.has(n) && !R.canSelect(state, n) ? 'next' : 'todo')).join('')}</ul>
-        ${i === 2 ? `<small class="rt-dependency">${level.map(prerequisites).map(esc).join('；')}</small>` : ''}
-      </div>` : '').join('')}</div></section>`;
-  }).join('');
-  return `<div class="route-track" aria-label="${esc(dual.name)} 並行前置路線">
-    <p class="rt-guide">各樹可並行推進；樹內依階級與分支條件解鎖。</p>
-    <div class="rt-branches">${branches}</div>
-    <div class="rt-merge">↓ 前置條件齊備後匯合</div>
-    <ul class="rt-result">
-    <li class="rt-node goal ${plan.steps.length ? '' : 'ready'}" aria-label="${esc(dual.name + (plan.steps.length ? ' · 未解鎖，還差 ' + plan.steps.length + ' 條策略' : ' · 前置齊備，可在遊戲中取得'))}" title="${plan.steps.length ? '完成前置策略後解鎖' : '前置齊備，請在遊戲中實際取得後確認'}"><span class="rt-dot">${plan.steps.length ? icon('lock') : '★'}</span><span class="rt-name">${esc(dual.name)}</span><span class="badge badge-sm badge-ghost">${plan.steps.length ? '未解鎖' : '可取得'}</span></li>
-    </ul>
+function redRouteSummary(plan) {
+  return `<div class="red-route-summary">
+    <p><span>槽位</span>${esc(slotLabel(plan.slot))}</p>
+    <p><span>尚需</span>${plan.steps.length ? plan.steps.map(esc).join('、') : '前置齊備'}</p>
   </div>`;
 }
-
 function conflictSummary(goal) {
   const inherited = state.inherited.find(x=>x?.name===goal.name);
   if (inherited) return `此紅策已配置在傳承欄：${esc(R.inheritanceReason(state,inherited) || '承載條件齊備，請在遊戲確認啟用')}。普通取得路線不重複配置。`;
@@ -103,7 +67,7 @@ function fiveDualRouteEntries() {
   });
 }
 
-// The badge counts the same prerequisites as its expanded route, never a predicted red acquisition.
+// Badge progress and its floating detail use the same remaining prerequisites.
 function redProgressBadge(d, plan, nextNames, label = '') {
   const acquired = state.acquired.find(x => x.name === d.name);
   const inherited = state.inherited.find(x => x?.name === d.name);
@@ -119,15 +83,15 @@ function redProgressBadge(d, plan, nextNames, label = '') {
   const status = acquired ? '已取得' : active ? '傳承已啟用' : inherited ? '傳承待啟用'
     : blocked ? '模式衝突' : ready ? '待取得' : plan.steps.length ? `前置 ${done}/${total}` : '承載待確認';
   const tone = acquired || active ? 'complete' : ready ? 'ready' : inherited || blocked ? 'pending' : 'locked';
-  // Keep both tactic trees even when their elements match. Alternatives belong to one source.
   const sources = [d.prim, d.sec].map(group => {
     const candidates = [...new Set(group.map(n => R.nodes.get(n)?.tree).filter(Boolean))];
     const tree = candidates.find(t => [...state.selected, ...plan.steps].some(n => R.nodes.get(n)?.tree === t)) || candidates[0];
     const pending = plan.steps.filter(n => R.nodes.get(n)?.tree === tree);
     const selected = [...state.selected].filter(n => R.nodes.get(n)?.tree === tree);
+    const chosen = group.find(n => state.selected.has(n));
     const count = new Set([...selected, ...pending]).size;
     const complete = !!(acquired || active || !inherited && count && !pending.length);
-    return { tree, color:elementOf(tree?.element)?.color || 'var(--muted)', count,
+    return { tree, name:chosen || tree?.name || '策略來源', color:elementOf(tree?.element)?.color || 'var(--muted)', count,
       done:count-pending.length, complete };
   });
   const colors = sources.map(s => s.color);
@@ -136,24 +100,24 @@ function redProgressBadge(d, plan, nextNames, label = '') {
   const fillKey = d.name + '|' + plan.slot;
   redFillPlans.set(fillKey, {slot:plan.slot,steps:[...plan.steps]});
   return `<details id="red-badge-${DUALS.indexOf(d)}" class="red-badge" data-status="${tone}" style="--red-primary:${primary};--red-secondary:${secondary}">
-    <summary>
+    <summary aria-label="${esc(d.name)}，${esc(status)}，查看詳情">
       <span class="red-fusion ${ready || acquired || active ? 'joined' : ''}" aria-hidden="true">
         ${sources.map(s => `<span class="fusion-part ${s.complete ? 'source-ready' : ''}" style="--el:${s.color}"><span class="red-element" style="--el:${s.color}">${CompassArt.icon(s.tree)}</span></span>`).join('')}
         <span class="fusion-joint">${acquired || active ? '✓' : ''}</span>
       </span>
-      <span class="fusion-sources">${sources.map(s => `<span class="fusion-source ${s.complete ? 'source-ready' : ''}" style="--el:${s.color}"><span>${esc(s.tree?.name || '策略來源')}</span><small>${inherited ? active ? '已啟用' : '傳承待啟用' : acquired ? '✓' : s.count ? s.done + '/' + s.count : '未選'}</small></span>`).join('<span class="fusion-plus" aria-hidden="true">＋</span>')}</span>
+      <span class="fusion-sources">${sources.map(s => `<span class="fusion-source ${s.complete ? 'source-ready' : ''}" style="--el:${s.color}"><span>${esc(s.name)}</span><small>${inherited ? active ? '已啟用' : '傳承待啟用' : acquired ? '✓' : s.count ? s.done + '/' + s.count : '未選'}</small></span>`).join('<span class="fusion-plus" aria-hidden="true">＋</span>')}</span>
       <strong class="red-badge-name">${esc(d.name)}</strong>
       <span class="red-badge-slot">${esc(slotLabel(slot))}${label ? ' · ' + esc(label) : ''}</span>
       <span class="badge badge-sm red-badge-status">${acquired || active ? '✓ ' : ready ? '◇ ' : ''}${esc(status)}</span>
       <span class="red-segments" aria-hidden="true" style="--segment-count:${Math.max(total, 1)}">${Array.from({length: Math.max(total, 1)}, (_, i) => `<i style="--segment-position:${total > 1 ? i / (total - 1) * 100 : 0}%" class="${acquired || active || !inherited && i < done ? 'filled' : ''}"></i>`).join('')}</span>
-      <span class="red-badge-hint"><span class="when-closed">查看前置與效果 ▾</span><span class="when-open">收起詳情 ▴</span></span>
     </summary>
-    <div class="red-badge-detail">
-      ${redRecipe(d)}
-      ${!acquired && !inherited ? `<div class="dual-actions red-fill">${button('加入裝配規劃', 'plan-red', fillKey)}<small>先加入規劃清單，不改變本局取得與傷害。實際取得後可從規劃清單另行填入。</small></div>` : ''}
-      ${acquired ? '<p>已記錄遊戲中取得。</p>' : inherited ? `<p>${esc(R.inheritanceReason(state, inherited) || (active ? '已確認傳承啟用。' : '請在傳承欄確認遊戲中已啟用。'))}</p>` : routeTrack(d, plan, nextNames)}
-      <div class="red-effect"><h4>策略效果</h4><p>${esc(d.desc)}</p><small>社群目錄 · 效果與取得前置尚未逐版本實機核對。傳承啟用條件與普通取得不同。</small></div>
-      ${ready ? `<div class="dual-actions">${button('遊戲中取得後確認 · ' + slotLabel(plan.slot), 'acquire', d.name + '|' + plan.slot)}</div>` : ''}
+    <div class="red-badge-detail" role="region" aria-label="${esc(d.name)}詳情">
+      <h3 class="red-detail-title">${esc(d.name)}</h3>
+      ${!acquired && !inherited ? redRecipe(d) + redRouteSummary(plan) : ''}
+      ${!acquired && !inherited ? `<div class="dual-actions red-fill">${button('加入裝配規劃', 'plan-red', fillKey)}</div>` : ''}
+      ${inherited && !active ? `<p>${esc(R.inheritanceReason(state, inherited) || '傳承待啟用')}</p>` : ''}
+      <div class="red-effect"><p>${esc(d.desc)}</p></div>
+      ${ready ? `<div class="dual-actions">${button('取得後確認 · ' + slotLabel(plan.slot), 'acquire', d.name + '|' + plan.slot)}</div>` : ''}
       ${acquired ? `<div class="dual-actions">${button('撤銷取得記錄', 'unacquire', d.name)}</div>` : ''}
     </div>
   </details>`;
@@ -206,8 +170,7 @@ function multiRedGuide() {
   const rest = actions.slice(current + 1).map((a, i) => multiRedStep(a, i + 2));
   const remaining = actions.length - current;
   return `<details class="mr-guide" open>
-    <summary>多紅操作順序 · 剩餘 ${remaining} 步<span class="mr-legend"><b data-kind="acquire">取得</b> 先拿同槽紅策 <b data-kind="select">選擇</b> 補前置 <b data-kind="confirm">啟用</b> 最後確認</span></summary>
-    <p class="mr-intro">順序不可對調：先補齊傳承啟用前置，傳承會立即佔用該槽，同槽紅策就無法共存。策略可趁三選一先選，紅策取得與傳承啟用照下列順序；每次操作後自動重算。</p>
+    <summary>多紅操作順序 · 剩餘 ${remaining} 步</summary>
     <div class="mr-now">${now.html}</div>
     ${rest.length ? `<details class="mr-rest"><summary>展開後續 ${rest.length} 步</summary><ol class="mr-steps">${rest.map(x => x.html).join('')}</ol></details>` : ''}
   </details>`;
@@ -224,23 +187,19 @@ function renderFiveDualProgress() {
   const alternatives = damagePriority ? [] : currentFiveDualCandidates.filter(x => fiveDualKey(x.set.duals) !== key && !directionKeys.has(fiveDualKey(x.set.duals)));
   document.getElementById('dualProgress').innerHTML = `
     <div class="panel-heading"><h2>紅策進度 <span class="dp-total">當前${goal ? goal.set.duals.length + ' 紅' : '五紅'}方案</span></h2></div>
-    <p class="red-progress-note">保留現有配裝 · 前置齊備後，仍需在遊戲中取得${goal?.search?.truncated ? ' · 搜尋已達上限' : ''}</p>
     ${multiRedGuide()}
     <div class="red-badges">${fiveDualRouteEntries().sort((a,b) => SLOTS.findIndex(s => s.id === a.plan.slot) - SLOTS.findIndex(s => s.id === b.plan.slot)).map(({ d, plan }) => {
       return redProgressBadge(d, plan, choices);
     }).join('') || `<p class="empty">${!damagePriority && state.fiveDualGoal ? '原五紅方案已受阻，未自動改換目標。' : '目前沒有相容的五紅方案。'}</p>`}</div>
     ${directions.length ? `<section class="base-directions" aria-label="空槽的其他同紅數方向">
-      <h3>空槽還有其他 ${goal.set.duals.length} 紅方向</h3><p>切換只更改規劃，不改動配裝。</p>
+      <h3>空槽還有其他 ${goal.set.duals.length} 紅方向</h3>
       ${directions.map(({name,slot,candidate}) => `<div class="base-direction"><div><strong>${esc(slotLabel(slot))} · ${esc(name)}</strong><span>同樣 ${candidate.set.duals.length} 紅 · 尚缺 ${candidate.missing} 條前置</span><small>改走：${candidate.set.duals.filter(n => !goal.set.duals.includes(n)).map(esc).join('、') || '相同紅策的其他前置路線'}</small></div>
         ${button('查看此方向','five-dual-goal',fiveDualKey(candidate.set.duals))}</div>`).join('')}</section>` : ''}
     ${relatedRedRoutes(goal)}
     ${replacementRouteSummary()}
     ${alternatives.length ? `<details id="five-dual-alternatives" class="route-detail"><summary>替代紅策方案 · 切換後才更新推薦</summary>
       ${alternatives.map(x => `<p>${esc(x.set.duals.join('、'))} · 尚缺 ${x.missing} 條前置
-        ${button('切換至此紅策方案', 'five-dual-goal', fiveDualKey(x.set.duals))}</p>`).join('')}</details>` : ''}
-    <details id="red-progress-help" class="route-detail compact-help"><summary>試算說明</summary>
-      <p class="model-scope">${goal?.fallback ? `有界動態補完${goal.search?.truncated ? '，搜尋已達上限' : ''}` : '普通／極限代表路線'}，未窮盡所有分支或前置變體。推薦先比較紅數與前置缺口，不估計掉落率或刷新成本；特殊紅策槽與黑市尚未納入，搜尋不到不代表遊戲無解。</p>
-      <p>亮起表示已取得或已啟用傳承；待取得需在遊戲中確認。傳承「影子冰刺」「冰擊化劍」可依已收錄案例試算延後啟用多紅，請按操作順序。</p></details>`;
+        ${button('切換至此紅策方案', 'five-dual-goal', fiveDualKey(x.set.duals))}</p>`).join('')}</details>` : ''}`;
 }
 
 function replacementRouteSummary() {
@@ -305,7 +264,6 @@ function renderDualProgress(recs = []) {
   document.getElementById('dualProgress').innerHTML = `
     <div class="panel-heading"><h2>紅策進度 <span class="dp-total">${character ? '人物核心與五紅補完' : ''}</span></h2>
     ${characterMode ? '' : button(showAllDuals ? '收起' : '更多路線', 'all-duals', '')}</div>
-    <p class="red-progress-note">${character ? '保留人物核心，採有界搜尋補完；未窮盡所有分支。' : ''}點開徽章查看並行前置與效果；待取得不等於已取得。</p>
     <div class="red-badges">${shown.sort((a,b) => SLOTS.findIndex(s => s.id === a.plans[0].slot) - SLOTS.findIndex(s => s.id === b.plans[0].slot))
       .map(({d,plans}) => redProgressBadge(d, plans[0], shared, character ? character.build.duals.includes(d.name) ? '核心' : '補完' : '')).join('')
       || '<p class="empty">選擇人物流派或基礎策略，查看紅策目標。</p>'}</div>`;
