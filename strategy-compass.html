@@ -981,11 +981,8 @@
       <section id="damageEstimate" class="damage-estimate" aria-labelledby="damageTitle"></section>
     </details>
 
-    <details id="rules-help" class="rules-note"><summary>規則與說明</summary>
-      <p>「可規劃 N 紅」是選下該策略後，保留現有基礎、強化、取得與傳承記錄，搜尋到的一套可同時共存方案；不是互斥路線數量的加總，也不代表遊戲上限。詳情可查看組合；不會自動選取或切換目標。</p>
-      <p>逐項紅數不受人物目標或固定值排序限制。普通／極限使用各自容量與代表路線；找不到代表路線時採有界補完，未窮盡全部變體，也不估計掉落率或刷新成本。</p>
-      <p>進階需前置；紅策取得與傳承啟用需在遊戲中確認。I 階傳承直接填入裝配，II 階需 I 階，III 階需 I、II 階實際齊備後自動生效，仍遵守互斥。毒霧／毒環／雷雲特殊紅策槽與黑市尚未完整建模；III 階一條為保守模型，逐條紅策合成前置待實機核對，搜尋不到不代表遊戲無解。</p>
-      <p>固定值推薦指標不含頻率、機率或倍率配合，非實戰傷害；人物配法為社群機制推論，非實測強度排名。</p><a href="docs/strategy-reference.md">完整規則與來源</a></details>
+    <details id="rules-help" class="rules-note"><summary>規則說明</summary>
+      <p>進階需前置；紅策取得與傳承啟用需在遊戲中確認。I 階傳承直接填入裝配，II 階需 I 階，III 階需 I、II 階齊備後自動生效。</p></details>
   </section>
 </main>
 
@@ -1054,7 +1051,6 @@
       <ul style="color:var(--muted);font-size:.82rem;padding-left:18px;margin:0">
         <li>策略依觸發方式分為五槽：<strong>普攻 / 衝刺 / 技能 / 召喚 / 傳承技</strong>。</li>
         <li>每條策略樹由基礎 I 階 → II 階 → III 階組成。</li>
-        <li>目前一般模型檢查名稱條件與承載樹 III 階；逐條合成前置及特殊槽仍需按遊戲版本核對。</li>
         <li>普通局內取得依紅策所屬觸發槽位規劃；傳承與特殊取得另外記錄。</li>
       </ul>
     </div>
@@ -1080,9 +1076,7 @@
 </dialog>
 <footer>
   <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;align-items:center">
-    <span title="遊戲版本未知；社群目錄來源 2026-10-15／17，尚未逐條實機核對">Steam／PC · 社群資料 · 規則 2026-11-08</span>
     <button onclick="openDataModal()" style="background:transparent;border:1px solid #4b5160;color:var(--muted);padding:4px 12px;border-radius:999px;cursor:pointer;font-size:.75rem">數據管理</button>
-    <a href="docs/strategy-reference.md">規則與資料來源</a>
     <a href="character-skills.html" style="background:transparent;border:1px solid #4b5160;color:var(--muted);padding:4px 12px;border-radius:999px;cursor:pointer;font-size:.75rem;text-decoration:none">🧩 角色技能樹</a>
   </div>
 </footer>
@@ -1095,19 +1089,19 @@
 <script src="strategy-five-duals-extreme.js?v=20261108-audit-fixes"></script>
 <script src="strategy-damage-data.js?v=20261108-audit-fixes"></script>
 <script src="strategy-damage.js?v=20261108-audit-fixes"></script>
-<script src="strategy-dps.js?v=20261108-audit-fixes"></script>
-<script src="strategy-damage-view.js?v=20261108-audit-fixes"></script>
+<script src="strategy-dps.js?v=20261111-clear-copy"></script>
+<script src="strategy-damage-view.js?v=20261111-clear-copy"></script>
 <script src="strategy-five-dual-scores.js?v=20261108-audit-fixes"></script>
 <script src="strategy-five-dual-scores-extreme.js?v=20261108-audit-fixes"></script>
 <script src="strategy-legacy.js?v=20261108-audit-fixes"></script>
-<script src="strategy-rules.js?v=20261108-inherit-offers"></script>
+<script src="strategy-rules.js?v=20261111-clear-copy"></script>
 <script src="strategy-outlook.js?v=20261108-inherit-offers"></script>
-<script src="strategy-outlook-view.js?v=20261111-compact-info"></script>
+<script src="strategy-outlook-view.js?v=20261111-clear-copy"></script>
 <script src="strategy-offers.js?v=20261111-red-dock"></script>
-<script src="strategy-characters.js?v=20261108-inherit-offers"></script>
+<script src="strategy-characters.js?v=20261111-clear-copy"></script>
 <script src="strategy-session.js?v=20261108-audit-fixes"></script>
 <script src="strategy-recommendations.js?v=20261108-inherit-offers"></script>
-<script src="strategy-routes.js?v=20261111-red-dock"></script>
-<script src="strategy-app.js?v=20261111-red-dock"></script>
+<script src="strategy-routes.js?v=20261111-clear-copy"></script>
+<script src="strategy-app.js?v=20261111-clear-copy"></script>
 </body>
 </html>

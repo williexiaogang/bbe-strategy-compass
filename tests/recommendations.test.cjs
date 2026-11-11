@@ -751,7 +751,7 @@ test('related red disclosure is absent on an empty build and includes every indi
   })()`,context);
   assert.equal(result.empty,'');assert.ok(result.unchanged&&result.expected.length);
   for(const name of result.expected)assert.ok(result.html.includes(name),name);
-  assert.ok(result.html.includes('可能互斥'));
+  assert.ok(!result.html.includes('可能互斥'));
   assert.ok(!result.html.includes(' open'));
 });
 
@@ -782,7 +782,7 @@ test('live red progress retains the screenshot poison bases instead of automatic
   for(const name of ['火精靈引爆','爆燃火彈','燃燒爆彈','燃氣毒泡','分裂史萊姆'])assert.ok(!result.entries.includes(name),name);
   assert.ok(result.replacements.length);
   assert.equal(result.canSwitchReplacement,false,'replacement references must not be selectable as an unchanged goal');
-  assert.ok(result.replacementHtml.includes('不計入當前進度')&&result.replacementHtml.includes('需替換：'));
+  assert.ok(result.replacementHtml.includes('需替換 I 階基礎')&&result.replacementHtml.includes('需替換：'));
   assert.ok(!result.replacementHtml.includes('data-action='));
   assert.ok(!result.replacementHtml.includes(' open'));
   assert.ok(result.html.includes('前置齊備 · 待取得'));

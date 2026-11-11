@@ -233,13 +233,13 @@ function inheritCard(entry, i) {
     <div class="inh-slots" role="group" aria-label="承載槽位">${available.map(s => `<button type="button"
       class="inh-slot ${entry.slot === s ? 'active' : ''}" data-action="inherit-slot" data-value="${i}|${entry.slot === s ? '' : s}" ${node?.level === 1 ? 'disabled' : ''}
       aria-pressed="${entry.slot === s}" title="${esc(slotLabel(s))}">${icon(s)}<span>${esc(slotLabel(s))}</span></button>`).join('')}</div>
-    <div class="flex items-center gap-2" role="status"><span class="badge badge-sm ${on ? 'badge-success' : 'badge-ghost'}">${icon(on ? 'check' : reason ? 'lock' : 'power')}${on ? entry.observed?'實機已確認':'已啟用' : unknown?'規則待核對':reason ? '待解鎖' : '未啟用'}</span></div>
-    <p class="inh-status">${esc(reason || (on ? node?'前置齊備，已自動計入裝配':entry.observed?'實機記錄已計入；啟用規則仍待核對':'已計入傳承生效 · 停用可保留配置' : '尚未生效 · 請在遊戲中確認後啟用'))}</p>
-    ${dual&&R.inheritedRules[entry.name]?`<small class="inherit-evidence">社群啟用條件：${R.inheritedRules[entry.name].groups.map(g=>g.map(esc).join(' 或 ')).join(' ＋ ')}。<a href="${esc(R.inheritanceSource.url)}" target="_blank" rel="noopener">來源</a> · 非實機驗證</small>`:''}
+    <div class="flex items-center gap-2" role="status"><span class="badge badge-sm ${on ? 'badge-success' : 'badge-ghost'}">${icon(on ? 'check' : reason ? 'lock' : 'power')}${on ? '已啟用' : unknown?'待確認':reason ? '待解鎖' : '未啟用'}</span></div>
+    <p class="inh-status">${esc(reason || (on ? node?'前置齊備，已自動計入裝配':'已計入傳承生效' : '請在遊戲中確認後啟用'))}</p>
+    ${dual&&R.inheritedRules[entry.name]?`<small class="inherit-evidence">啟用條件：${R.inheritedRules[entry.name].groups.map(g=>g.map(esc).join(' 或 ')).join(' ＋ ')}</small>`:''}
     <div class="flex flex-wrap gap-2 mt-auto">
-      ${node ? `<span class="inherit-hint">${on?'前置齊備，自動生效':node.level===3?'需實際取得 I、II 階後生效':'取得對應 I 階後生效'}</span>` : `<button type="button" class="inh-toggle ${on ? 'on' : ''} flex-1" data-action="inherit-confirm" data-value="${i}"
+      ${node ? `<span class="inherit-hint">${on?'前置齊備，自動生效':node.level===3?'需取得 I、II 階後生效':'取得對應 I 階後生效'}</span>` : `<button type="button" class="inh-toggle ${on ? 'on' : ''} flex-1" data-action="inherit-confirm" data-value="${i}"
         aria-pressed="${on}" aria-label="${esc((on ? '停用' : '啟用') + '傳承「' + entry.name + '」')}" ${reason && !on ? 'disabled' : ''}>${icon('power')}${on ? '停用' : '啟用傳承'}</button>`}
-      ${unknown&&!on?button('實機已生效，手動記錄','inherit-observe',i,entry.slot?'':'disabled'):''}
+      ${unknown&&!on?button('已在遊戲生效','inherit-observe',i,entry.slot?'':'disabled'):''}
       <button type="button" class="btn btn-sm btn-ghost" data-action="inherit-discard" data-value="${i}"
         aria-label="${esc('棄用傳承「' + entry.name + '」，清空此槽')}" title="清空此傳承槽">${icon('discard')}棄用</button>
     </div>
@@ -318,18 +318,17 @@ function tipHtml(name, full = false) {
     <div class="tip-state ${chosen ? 'ok' : lock ? 'lock' : 'free'}">${chosen ? '✓ 已選擇' : lock ? '🔒 ' + esc(lock) : '可選擇'}</div>
     ${full ? ordinaryEffectHtml(name) + outlookDetail(name) : ''}
     ${ranked.length ? `<div class="tip-sub">是以下紅策的前置（${ranked.length}）</div><ul class="tip-feeds">${ranked.slice(0, full ? ranked.length : 5).map(({ d, steps }) =>
-      `<li class="${d.name === state.target ? 'goal' : ''}"><span>${esc(d.name)}</span><em>${steps === Infinity ? '目前一般模型未找到路線' : steps === 0 ? '可取得' : `差 ${steps} 條`}</em></li>`).join('')}
+      `<li class="${d.name === state.target ? 'goal' : ''}"><span>${esc(d.name)}</span><em>${steps === Infinity ? '暫無路線' : steps === 0 ? '可取得' : `差 ${steps} 條`}</em></li>`).join('')}
       ${!full && ranked.length > 5 ? `<li class="more">…另有 ${ranked.length - 5} 條</li>` : ''}</ul>` : '<div class="tip-sub">不直接構成紅策條件</div>'}`;
 }
 
 function ordinaryEffectHtml(name) {
   const data=CompassCatalogue.tactic(name);
   const groups=R.nodeRequirements[name] || [];
-  return `<section class="ordinary-effect"><h4>觸發與效果</h4><p>${esc(data?.descZh || '效果資料待補，請以遊戲內描述核對。')}</p>
+  return `<section class="ordinary-effect"><h4>觸發與效果</h4><p>${esc(data?.descZh || '效果資料待補。')}</p>
     ${groups.length?`<p>額外前置：${groups.map(g=>g.map(esc).join(' 或 ')).join(' ＋ ')}</p>`:''}
-    ${data?.rarity?.length===4?`<p>白／藍／紫／金品質的對應數值：${data.rarity.map(esc).join(' ／ ')}。單位與作用請依上方效果文字。</p>`:''}
-    ${data?.noteZh?`<p>${esc(data.noteZh)}</p>`:''}
-    <small><a href="https://blazblue.wiki/wiki/BlazBlue_Entropy_Effect/Tactics" target="_blank" rel="noopener">社群圖鑑描述</a> · 整理 2026-10-17 · 遊戲版本待核對；階級 I／II／III 與品質不同。</small></section>`;
+    ${data?.rarity?.length===4?`<p>白／藍／紫／金：${data.rarity.map(esc).join(' ／ ')}</p>`:''}
+    ${data?.noteZh?`<p>${esc(data.noteZh)}</p>`:''}</section>`;
 }
 let tipTimer = 0;
 function showTip(node) {
@@ -399,8 +398,7 @@ function openStrategyDetail(name) {
   const node=R.nodes.get(name); if(!node)return;
   hideTip();
   document.getElementById('strategyDetailTitle').textContent=name;
-  document.getElementById('strategyDetailBody').innerHTML=tipHtml(name,true)+
-    '<p class="tip-meta">此處只查詢資料，不會選擇或取消策略。</p>';
+  document.getElementById('strategyDetailBody').innerHTML=tipHtml(name,true);
   openDialog('strategyDetailModal');
 }
 
@@ -600,15 +598,14 @@ function renderNextHero(goal, plan, completed, recs) {
   } else if (recs.length) {
     if (!main) main = mode === 'character' ? currentCharacterGoal?.completion && !currentCharacterGoal.coreSteps.length
       ? '人物核心前置齊備，繼續補完五紅' : '可推進人物流派與五紅的候選' : goal ? esc(goal.name) : '可推進紅策的候選';
-    if (!sub) sub = '請對照遊戲本次三選一；只顯示現在符合前置與模式限制的策略。';
-    if (mode === 'auto') sub += ' 候選可來自不同替代路線，不代表能同時選取；按可推進路線與距離排序，選擇後重新計算。';
+    if (!sub) sub = '對照遊戲本次三選一。';
     const choices = recs.map(r => {
       const node = R.nodes.get(r.name);
       return button(slotLabel(node.slot || R.base(state,node.tree)?.slot) + ' · ' + r.name, 'recommend', r.name,
         `title="${esc('推進：' + r.targets.join('、'))}"`);
     }).join('');
     alts = recs.length > 12 && mode === 'auto' && !goal
-      ? `<details class="route-detail" id="auto-candidates"><summary>全部可推進候選（${recs.length}）· 對照本次三選一</summary><div class="next-moves">${choices}</div></details>` : choices;
+      ? `<details class="route-detail" id="auto-candidates"><summary>全部可推進候選（${recs.length}）</summary><div class="next-moves">${choices}</div></details>` : choices;
   } else if (charReady) {
     const status = currentCharacterGoal;
     if (status?.conflicts.length) {
@@ -622,15 +619,13 @@ function renderNextHero(goal, plan, completed, recs) {
       tone = 'done'; main = status.completion?.redCount === 5 ? '人物流派與五紅已完成' : '人物流派已完成'; sub = status.build.name;
     }
   } else if (!main) {
-    tone = 'idle'; main = '從任一槽位選擇基礎策略'; sub = '選好後會自動計算最接近的紅策路線。';
+    tone = 'idle'; main = '從任一槽位選擇基礎策略'; sub = '選好後會自動計算紅策路線。';
   }
-  if (mode === 'character' && currentCharacterGoal) sub += ` · ${currentCharacterGoal.build.name} · ${currentCharacterGoal.reason}（定性偏好，非實測傷害排名）`;
+  if (mode === 'character' && currentCharacterGoal) sub += ` · ${currentCharacterGoal.build.name} · ${currentCharacterGoal.reason}`;
   if (mode === 'character' && currentCharacterGoal?.completion) {
     const completion = currentCharacterGoal.completion;
-    if(completion.search?.truncated) sub += ' 本次補完搜尋已達上限，可能還有其他路線。';
-    sub += ` · 保留人物核心，已找到 ${completion.redCount < 5 ? completion.redCount + '/5' : completion.redCount} 紅的相容規劃。`;
-    if (completion.redCount < 5) sub += completion.unresolved.length
-      ? '請先確認相關傳承的承載槽位與啟用前置，再重新計算補完。' : '目前搜尋未找到完整五紅，先推進相容路線；不會為湊五紅替換人物核心。';
+    sub += ` · 已找到 ${completion.redCount < 5 ? completion.redCount + '/5' : completion.redCount} 紅的相容規劃。`;
+    if (completion.redCount < 5 && completion.unresolved.length) sub += ' 請先確認傳承槽位與啟用前置。';
   }
   const modeIssues = R.modeConflicts(state);
   if (modeIssues.length) {
@@ -845,7 +840,7 @@ document.addEventListener('click', async event => {
   else if(action==='inherit-observe') {
     const i=Number(value),entry=state.inherited[i];if(!entry)return;
     const reason=R.inherit(state,i,entry.name,entry.slot,true,true);
-    commit(reason||`已記錄「${entry.name}」在遊戲中生效；條件仍待核對。`,reason?'error':'ok');
+    commit(reason||`已記錄「${entry.name}」在遊戲中生效。`,reason?'error':'ok');
   }
   else if (action === 'share') shareBuild();
   else if (action === 'target') { state.target = value; commit(); }

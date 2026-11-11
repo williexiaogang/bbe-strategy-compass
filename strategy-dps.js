@@ -48,7 +48,7 @@ const CompassDps = (() => {
         else if(quantity.mode==='chance-extra')count*=1+value/100*quantity.extra;
         notes.push(quantity.mode==='chance-extra'?`${name}：${value}% 機率額外 ${quantity.extra} 個`:`${name}：${quantity.mode==='total'?'總數':'增加'} ${value}`);
       }
-      if(['技能火彈','傳承技火彈'].includes(row.name))notes.push(`發射 ${state.selected.has('多重火彈')?14:10} 顆，但同敵衰減未知，維持等效 1 次；可自行覆寫`);
+      if(['技能火彈','傳承技火彈'].includes(row.name))notes.push(`發射 ${state.selected.has('多重火彈')?14:10} 顆 · 等效 1 次`);
       return {count,notes};
     };
     const frequencyOf=row=>{
@@ -60,16 +60,16 @@ const CompassDps = (() => {
       }
       if(row.name==='普攻光波'){
         const seconds=5+(state.selected.has('增強光波')?1:0)-(active.has('光波快充')?2.5:0);
-        cap=1/seconds;notes.push(`光波充能至少 ${seconds} 秒${active.has('光波快充')?'，假設位於光陣內':''}`);
+        cap=1/seconds;notes.push(`光波充能 ${seconds} 秒`);
       }
       const slot=slotOf(row),icd=scenario.cooldowns[key];
       const icdRemoved=slot==='skill'&&scenario.removeSkillIcd||slot==='dash'&&scenario.removeDashIcd;
       if(icd>0){
-        if(icdRemoved)notes.push(`已按${slot==='skill'?'技能':'衝刺'}槽解除假設忽略自訂內建 CD`);
-        else{cap=Math.min(cap??Infinity,1/icd);notes.push(`自訂內建 CD ${icd} 秒（假設／實測輸入）`);}
+        if(icdRemoved)notes.push(`已解除${slot==='skill'?'技能':'衝刺'}槽內建 CD`);
+        else{cap=Math.min(cap??Infinity,1/icd);notes.push(`內建 CD ${icd} 秒`);}
       }
       const parent=parentOf(row),parentFrequency=parent&&frequencyOf(parent);
-      if(parentFrequency){cap=Math.min(cap??Infinity,parentFrequency.rate);notes.push(`由${parent.name}觸發，頻率不超過來源`);}
+      if(parentFrequency){cap=Math.min(cap??Infinity,parentFrequency.rate);notes.push(`由${parent.name}觸發`);}
       const defaultRate=parentFrequency?parentFrequency.rate:cap===null?1:Math.min(1,cap);
       const requestedRate=scenario.rates[key]??defaultRate;
       const rate=cap===null?requestedRate:Math.min(requestedRate,cap);

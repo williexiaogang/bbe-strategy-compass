@@ -25,8 +25,8 @@ test('unknown inheritance requires an explicit observed record which survives po
   const d=[...R.byName.values()].find(d=>!R.inheritedRules[d.name]);
   const host=R.hosts(d)[0],slot=R.nodes.get(host).slot,s=R.empty();select(s,host);
   assert.equal(R.inherit(s,0,d.name,slot),'');
-  assert.match(R.inheritanceReason(s,s.inherited[0]),/待核對/);
-  assert.match(R.inherit(s,0,d.name,slot,true),/待核對/);
+  assert.match(R.inheritanceReason(s,s.inherited[0]),/手動記錄/);
+  assert.match(R.inherit(s,0,d.name,slot,true),/手動記錄/);
   assert.equal(R.activeInherited(s).length,0);
   const raw=plain(R.serialize(s));raw.inherited[0].confirmed=true;
   const legacy=R.restore(raw);assert.ok(legacy.warnings.length);
@@ -37,7 +37,7 @@ test('unknown inheritance requires an explicit observed record which survives po
   assert.equal(restored.state.inherited[0].observed,true);
   assert.equal(R.activeInherited(restored.state).length,1);
   assert.equal(R.inherit(s,0,d.name,slot,false,true),'');
-  assert.match(R.inheritanceReason(s,s.inherited[0]),/待核對/,'turning an observed record off must not create a predicted activation rule');
+  assert.match(R.inheritanceReason(s,s.inherited[0]),/手動記錄/,'turning an observed record off must not create a predicted activation rule');
   assert.equal(R.activeInherited(s).length,0);
 });
 

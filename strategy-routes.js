@@ -17,15 +17,15 @@ function conflictSummary(goal) {
   const inherited = state.inherited.find(x=>x?.name===goal.name);
   if (inherited) return `此紅策已配置在傳承欄：${esc(R.inheritanceReason(state,inherited) || '承載條件齊備，請在遊戲確認啟用')}。普通取得路線不重複配置。`;
   const options = R.adjustments(state,goal);
-  return `<p>目前普通取得路線不可達；以下僅預覽調整，不會修改配裝，也未涵蓋特殊玩法。</p>${options.length ?
+  return `<p>目前路線不可達，可預覽以下調整。</p>${options.length ?
     options.map((x,i)=>`<details class="route-detail"><summary>調整方案 ${i+1} · 移除 ${x.removed.length} 條策略／${x.records.length+x.inherited.length} 條記錄</summary>
       <p>${x.reasons.map(esc).join('；')}</p>
       ${x.removed.length ? `<p>需取消（含連帶移除）：${x.removed.map(esc).join('、')}</p>` : ''}
       ${x.records.length ? `<p>受影響的已取得記錄：${x.records.map(esc).join('、')}</p>` : ''}
       ${x.inherited.length ? `<p>需移出傳承：${x.inherited.map(esc).join('、')}</p>` : ''}
       ${x.unconfirmed.length ? `<p>需重新確認傳承啟用：${x.unconfirmed.map(esc).join('、')}</p>` : ''}
-      <p>調整後尚需前置（各樹可並行）：${x.plan.steps.map(esc).join('、') || '前置已齊備'} · ${esc(slotLabel(x.plan.slot))}</p></details>`).join('') :
-    '<p>目前未找到可驗證的調整方案；可先查看目標的前置與效果。不代表所有玩法都無解。</p>'}
+      <p>調整後尚需前置：${x.plan.steps.map(esc).join('、') || '前置已齊備'} · ${esc(slotLabel(x.plan.slot))}</p></details>`).join('') :
+    '<p>目前未找到調整方案。</p>'}
     <details class="route-detail"><summary>目標前置與效果</summary><p>主條件任一：${goal.prim.map(esc).join('／')}；次條件任一：${goal.sec.map(esc).join('／')}；額外條件：${(goal.need||[]).map(esc).join('、')||'無'}。承載樹仍須 III 階。</p><p>${esc(goal.desc)}</p></details>`;
 }
 
@@ -205,10 +205,8 @@ function renderFiveDualProgress() {
 function replacementRouteSummary() {
   const candidates = currentReplacementCandidates.filter(x => x.set.duals.length >= (currentFiveDualGoal?.set.duals.length || 0));
   if (!candidates.length) return '';
-  return `<details id="replacement-red-routes" class="route-detail replacement-red-routes"><summary>需替換 I 階基礎的其他方案 · 不計入當前進度</summary>
-    <p>僅適用遊戲仍允許替換 I 階時；需在配裝欄自行替換，取得 II 階後鎖定。</p>
-    ${candidates.slice(0,3).map(x=>`<div class="replacement-route"><strong>替換後可規劃 ${x.set.duals.length} 紅</strong><p>需替換：${x.replacements.map(change=>`${esc(change.from)} → ${esc(change.to)}`).join('；')}</p><small>${x.set.duals.map(esc).join('、')}</small></div>`).join('')}
-    <p>顯示 ${Math.min(3,candidates.length)}／${candidates.length} 條代表方案。</p></details>`;
+  return `<details id="replacement-red-routes" class="route-detail replacement-red-routes"><summary>需替換 I 階基礎的其他方案</summary>
+    ${candidates.slice(0,3).map(x=>`<div class="replacement-route"><strong>替換後可規劃 ${x.set.duals.length} 紅</strong><p>需替換：${x.replacements.map(change=>`${esc(change.from)} → ${esc(change.to)}`).join('；')}</p><small>${x.set.duals.map(esc).join('、')}</small></div>`).join('')}</details>`;
 }
 
 // All individually legal red routes tied to an already chosen tree are useful
@@ -222,8 +220,7 @@ function relatedRedRoutes(goal) {
     .map(d => ({d,plan:R.plans(state,d)[0]})).filter(x => x.plan)
     .sort((a,b) => a.plan.steps.length-b.plan.steps.length);
   if (!related.length) return '';
-  return `<details id="related-red-routes" class="route-detail related-red-routes"><summary>已選策略還可延伸 ${related.length} 種紅策 · 展開查看</summary>
-    <p>單條可行路線，可能互斥，不代表可同時取得。</p>
+  return `<details id="related-red-routes" class="route-detail related-red-routes"><summary>已選策略還可延伸 ${related.length} 種紅策</summary>
     <div class="related-red-list">${related.map(({d,plan}) => {
       const bases = plan.steps.filter(n => R.nodes.get(n)?.level === 1);
       return `<div class="related-red-row"><div><strong>${esc(d.name)}</strong><span>${esc(slotLabel(plan.slot))} · ${plan.steps.length ? '尚缺 ' + plan.steps.length + ' 條前置' : '前置齊備 · 待取得'}</span>

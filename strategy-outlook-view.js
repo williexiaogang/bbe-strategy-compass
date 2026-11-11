@@ -11,10 +11,8 @@ function outlookDetail(name) {
   const result = strategyOutlook(name);
   if (!result) return state.selected.has(name) || R.canSelect(state, name) ? '' : `<section class="outlook-detail" data-outlook-detail="${esc(name)}" aria-busy="true"><h4>紅數試算中…</h4></section>`;
   return `<section class="outlook-detail" data-outlook-detail="${esc(name)}"><h4>${result.count ? `選擇後可規劃 ${result.count} 紅` : '暫未找到共存紅策方案'}</h4>
-    ${result.count ? `<p>${result.targets.map(x => esc(x.name)).join('、')}</p><small>保留現有配裝 · 尚需 ${result.steps.length} 條前置${result.truncated ? ' · 搜尋已達上限' : ''}</small>` : ''}
-    <small>目前模型找到的同時共存方案，非遊戲上限；與人物目標、排序方向分開試算。</small>
-    ${result.truncated && result.budget < 5000 && !outlookWorkerUnavailable ? button('加深搜尋','outlook-deepen',name) : ''}
-    ${result.truncated && result.budget >= 5000 ? '<small>本次加深搜尋仍未窮盡，已保留找到的方案。</small>' : ''}</section>`;
+    ${result.count ? `<p>${result.targets.map(x => esc(x.name)).join('、')}</p><small>尚需 ${result.steps.length} 條前置</small>` : ''}
+    ${result.truncated && result.budget < 5000 && !outlookWorkerUnavailable ? button('加深搜尋','outlook-deepen',name) : ''}</section>`;
 }
 
 function deepenOutlook(name) {
@@ -59,13 +57,13 @@ function queueBuildOutlooks() {
   const status = document.getElementById('buildOutlookStatus');
   const paint = (name, result) => {
     for (const el of badges.filter(el => el.dataset.outlookName === name)) {
-      el.textContent = result?.count ? `${result.count} 紅 · 差 ${result.steps.length}${result.truncated ? ' *' : ''}` : '未找到路線';
-      el.title = result?.truncated ? '已找到此方案，但本次搜尋未窮盡' : '';
+      el.textContent = result?.count ? `${result.count} 紅 · 差 ${result.steps.length}` : '未找到路線';
+      el.title = '';
       el.dataset.outlookCount = result?.count || 0;
       el.setAttribute('aria-busy', 'false');
       el.closest('button').title = result?.count
-        ? `選擇後可同時規劃 ${result.count} 紅 · 尚需 ${result.steps.length} 條前置\n${result.targets.map(x => x.name).join('、')}\n目前模型試算，非遊戲上限；詳情可查看組合。`
-        : '目前搜尋未找到共存路線，不代表遊戲無解。';
+        ? `選擇後可規劃 ${result.count} 紅 · 尚需 ${result.steps.length} 條前置\n${result.targets.map(x => x.name).join('、')}`
+        : '暫未找到共存路線。';
     }
   };
   badges.forEach(el => { if (cache.has(el.dataset.outlookName)) paint(el.dataset.outlookName, cache.get(el.dataset.outlookName)); });

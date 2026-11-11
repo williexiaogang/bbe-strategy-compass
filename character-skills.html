@@ -280,23 +280,9 @@
   <button type="button" class="btn btn-sm" onclick="expandAll(false)">全部收合</button>
 </div>
 
-<details class="rulesbox">
-  <summary>招式、強化與取得方式怎麼看？</summary>
-  <p>這份資料是招式與強化清單，尚不是逐條驗證的解鎖路徑。基礎普攻、跳躍與衝刺可能是初始動作，不能從分支第一項推定需要先抽取。</p>
-  <ul><li>「初始動作」只用於來源明確寫出預設具備的條目。</li>
-  <li>「追加招式」表示來源記載的新招式；具體前置與取得順序仍需核對。</li>
-  <li>「取得方式待核對」不代表自動獲得。三段跳、增加無敵幀等強化，請按遊戲實際取得情況確認。</li>
-  <li>隱藏效果的括號列出組合線索；完整跨分支前置與版本條件仍待核對。</li></ul>
-  <p class="warn">未標記或舊資料的 builtin／auto 分類，不足以證明某個強化隨招式免費生效。潛能通常需要對照遊戲本次選項取得，本頁不把整理條目數當作已取得數。</p>
-</details>
-
-<section class="charbar" aria-labelledby="charSelectTitle"><h2 id="charSelectTitle">選擇角色</h2><p class="hint">查看天賦、傳承技與招式分支。部分角色資料待補；歷史評級收在來源說明，不作目前強度排名。</p><div class="chips" id="chips"></div></section>
+<section class="charbar" aria-labelledby="charSelectTitle"><h2 id="charSelectTitle">選擇角色</h2><p class="hint">查看天賦、傳承技與招式分支。</p><div class="chips" id="chips"></div></section>
 
 <main id="app"></main>
-
-<footer>
-  資料整理自 <a href="https://blazblue.wiki/index.php?title=BlazBlue_Entropy_Effect/Prototypes" target="_blank" rel="noopener">blazblue.wiki · Prototypes</a>。遊戲版本未知 · 目錄來源 2026-10-15 · 標記修訂 2026-11-08 · 原始頁面版本與核對日期未保存，實際以遊戲內為準。
-</footer>
 
 <script src="character-data.js?v=20261108-audit-fixes"></script>
 <script src="player-catalogue.js?v=20261108-audit-fixes"></script>
@@ -328,14 +314,14 @@ function pctInfo(c) {
 
 /* 解鎖層級標籤 */
 const KIND_BADGE = {
-  base: '<span class="kb kb-base">招式說明 · 取得方式待核對</span>',
-  auto: '<span class="kb kb-auto">關聯動作 · 取得方式待核對</span>',
-  extra: '<span class="kb kb-extra">追加招式 · 前置待核對</span>',
-  builtin: '<span class="kb kb-pending">強化條目 · 取得方式待核對</span>'
+  base: '<span class="kb kb-base">招式說明</span>',
+  auto: '<span class="kb kb-auto">關聯動作</span>',
+  extra: '<span class="kb kb-extra">追加招式</span>',
+  builtin: '<span class="kb kb-pending">強化</span>'
 };
 function kindBadge(k,text='') {
   if(k==='base'&&text.includes('預設'))return '<span class="kb kb-base">初始動作</span>';
-  return KIND_BADGE[k] || '<span class="kb kb-pending">取得方式待核對</span>';
+  return KIND_BADGE[k] || '<span class="kb kb-pending">強化</span>';
 }
 
 let curId = null;
@@ -377,7 +363,7 @@ function renderChar() {
           <div class="role">${esc(c.role || '')}</div>
         </div>
       </div>
-      <div class="notice">本資料集尚未收錄 ${esc(c.name)} 的潛能資料；不代表遊戲或來源網站沒有此角色內容。</div>
+      <div class="notice">尚未收錄 ${esc(c.name)} 的潛能資料。</div>
       <div class="card"><h3>可先看什麼</h3>
         <p>策略羅盤的「角色推薦」區塊有這名角色的推薦流派與核心策略，可以先從那裡配裝。</p>
         <p style="margin-top:8px"><a href="strategy-compass.html?char=${esc(c.id)}">前往策略羅盤查看 ${esc(c.name)} 的推薦流派 →</a></p>
@@ -403,24 +389,21 @@ function renderChar() {
       <div class="stats">
         <div class="stat"><b>${c.baseHp == null ? '—' : esc(c.baseHp)}</b><span>基礎 HP</span></div>
         <div class="stat"><b>${c.baseAtk == null ? '—' : esc(c.baseAtk)}</b><span>基礎 ATK</span></div>
-        <div class="stat"><b>${esc(p.n)}</b><span>來源標稱潛能數</span></div>
+        <div class="stat"><b>${esc(p.n)}</b><span>潛能數</span></div>
         <div class="stat"><b>${c.branchCount}</b><span>招式分支</span></div>
-        <div class="stat"><b>${c.nodeCount}</b><span>整理條目，非取得數</span></div>
+        <div class="stat"><b>${c.nodeCount}</b><span>條目數</span></div>
       </div>
     </div>
 
-    <details class="rulesbox"><summary>資料來源與適用範圍</summary><p>歷史社群評級：${esc(c.tier)}，評級版本與依據未逐條保存，不用作目前強度排序。來源潛能百分比 ${esc(p.p || '未記載')} 的含義與版本待核對，未當作目前配裝增傷。</p><p>既有社群整理，尚未按現行遊戲版本重新核實。角色推薦評級與潛能來源分開，不代表遊戲稀有度。</p>
-      ${(c.sourceIds||[]).map(id=>CHARACTER_SOURCES.find(s=>s.sourceId===id)).filter(Boolean).map(s=>`<p>本地來源：<a href="${esc(s.path)}">${esc(s.path)}</a> · 社群資料 · 遊戲版本／核對日期未知</p>`).join('')}
-    </details>
-    ${c.overview ? `<div class="card" style="margin-bottom:14px"><h3>來源玩法描述（歷史參考）</h3><p>${esc(c.overview)}</p></div>` : ''}
+    ${c.overview ? `<div class="card" style="margin-bottom:14px"><h3>玩法概述</h3><p>${esc(c.overview)}</p></div>` : ''}
 
     <div class="grid2">
       ${talent ? `<div class="card"><h3>${skillIcon('talent')}天賦 <span class="en">Talent</span></h3>
         <div class="nm">${esc(talent.nameZh)}</div><p>${esc(talent.desc)}</p></div>`
-      : `<div class="card"><h3>${skillIcon('talent')}天賦 <span class="en">Talent</span></h3><p class="empty-note">本資料集尚未收錄。</p></div>`}
+      : `<div class="card"><h3>${skillIcon('talent')}天賦 <span class="en">Talent</span></h3><p class="empty-note">尚未收錄。</p></div>`}
       ${mech ? `<div class="card"><h3>${skillIcon('mechanic')}獨特機制 <span class="en">Unique Mechanic</span></h3>
         <div class="nm">${esc(mech.nameZh)}</div><p>${esc(mech.desc)}</p></div>`
-      : `<div class="card"><h3>${skillIcon('mechanic')}獨特機制 <span class="en">Unique Mechanic</span></h3><p class="empty-note">本資料集尚未收錄。</p></div>`}
+      : `<div class="card"><h3>${skillIcon('mechanic')}獨特機制 <span class="en">Unique Mechanic</span></h3><p class="empty-note">尚未收錄。</p></div>`}
     </div>
 
     <div class="card" style="margin-bottom:14px">
@@ -428,9 +411,9 @@ function renderChar() {
       ${legacy.length ? legacy.map(l => `
         <div class="legacy-row">
           <div class="nm">${esc(l.nameZh)}</div>
-          <p>${esc(l.desc)}</p>${l.summary?`<small>與策略羅盤共用的社群機制摘要 · 完整數值待補 · <a href="${esc(donor.source)}" target="_blank" rel="noopener">來源</a></small>`:''}
+          <p>${esc(l.desc)}</p>
         </div>`).join('')
-      : '<p class="empty-note">本資料集尚未收錄這名角色的傳承技資料（可在遊戲內查詢）。</p>'}
+      : '<p class="empty-note">尚未收錄這名角色的傳承技資料。</p>'}
     </div>
 
     <div class="treehead">
@@ -500,8 +483,8 @@ function renderSearch() {
     (c.branches || []).forEach((b, i) => {
       push(i, b.nameZh, '招式分支', b.nameZh + (b.nameEn && !b.nameZh.includes(b.nameEn) ? ' · '+b.nameEn : ''));
       (b.nodes || []).forEach(n => {
-        push(i, b.nameZh, n.kind === 'extra' ? '追加招式（前置待核對）' : '招式／強化（取法待核對）', n.text);
-        (n.sub || []).forEach(x => push(i, b.nameZh, x.k === 'extra' ? '追加招式（前置待核對）' : '強化／附註（取法待核對）', x.t));
+        push(i, b.nameZh, n.kind === 'extra' ? '追加招式' : '招式／強化', n.text);
+        (n.sub || []).forEach(x => push(i, b.nameZh, x.k === 'extra' ? '追加招式' : '強化／附註', x.t));
       });
       (b.hidden || []).forEach(h => push(i, b.nameZh, '隱藏效果', (h.cond || '') + ' → ' + (h.effect || '')));
     });

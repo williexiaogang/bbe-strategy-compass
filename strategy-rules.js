@@ -156,12 +156,12 @@ function createCompassRules() {
     if (!recipeMet(state, dual)) return '尚未滿足主／次／分支條件';
     const owner = hosts(dual).find(n => nodes.get(n).slot === slot && state.selected.has(n));
     if (!owner) return '需選此觸發槽位的承載基礎策略';
-    if (!nodes.get(owner).tree.iii.some(n => state.selected.has(n))) return '目前模型要求承載策略先取得 III 階；逐條合成前置仍需按遊戲圖鑑核對';
+    if (!nodes.get(owner).tree.iii.some(n => state.selected.has(n))) return '需先取得承載策略的 III 階';
     const record = state.acquired.find(x => x.name === name && x.slot === slot);
     const taken = state.acquired.find(x => x.slot === slot && x.name !== name) ||
       state.inherited.find(x => byName.has(x?.name) && x.slot === slot && (!inheritedRules[x.name]?.delayed ||
         !inheritanceReason(state, x) && !validActivationOrder(state, record)));
-    return taken ? `此槽已有紅策「${taken.name}」；目前一般槽模型未支援此共存。毒霧／毒環／雷雲特殊槽與其他取得來源需另行核對，不能據此判定遊戲無解` : '';
+    return taken ? `此槽已有紅策「${taken.name}」` : '';
   }
 
   // A saved witness must itself be a legal earlier build, satisfy this red's
@@ -276,7 +276,7 @@ function createCompassRules() {
       return '此紅策已經存在';
     if (slot && !hosts(dual).some(n => nodes.get(n).slot === slot)) return '此紅策沒有此承載槽位';
     if (slot && state.inherited.some((x, i) => i !== index && byName.has(x?.name) && x.slot === slot))
-      return '同槽已有傳承紅策；目前一般槽模型未支援此共存，特殊槽需另行核對';
+      return '同槽已有傳承紅策';
     const entry = { name, slot, confirmed: Boolean(confirmed), ...(observed && !inheritedRules[name] ? {observed:true} : {}) };
     const trial = { ...state, selected: new Set(state.selected), inherited: state.inherited.map((x,i) => i === index ? entry : x) };
     const previous = state.inherited[index];
@@ -349,7 +349,7 @@ function createCompassRules() {
       const missing = rule.groups.filter(group => !group.some(n => state.selected.has(n)));
       return missing.length ? `尚缺啟用前置／分支：${missing.map(g => g.join('／')).join('、')}` : '';
     }
-    return entry.observed && entry.confirmed ? '' : '傳承啟用條件待核對；工具不自動推定已滿足，可在遊戲中生效後手動記錄';
+    return entry.observed && entry.confirmed ? '' : '請在遊戲中生效後手動記錄';
   }
 
   function activeInherited(state, includeNormal = false) {
@@ -701,7 +701,7 @@ function createCompassRules() {
     const pinned = Number.isInteger(state.characterBuild) && candidates[state.characterBuild];
     const result = pinned || candidates.sort((a, b) => a.conflicts.length - b.conflicts.length ||
       b.owned - a.owned || b.affinity - a.affinity || a.index - b.index)[0];
-    return result ? { ...result, reason: character.recommendReason || '依社群流派與目前配裝相容性推薦', pinned: Boolean(pinned) } : null;
+    return result ? { ...result, reason: character.recommendReason || '依流派與目前配裝相容性推薦', pinned: Boolean(pinned) } : null;
   }
 
   // Extend a character's verified core without replacing bases or changing its red targets.
