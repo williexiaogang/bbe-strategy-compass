@@ -657,6 +657,7 @@ function renderAll() {
   currentCharacterGoal = null;
   const recs = getRecommendations();
   renderCharacterPanel();
+  renderMindGuide();
   renderBuildSummary();
   if (inheritOpen) document.querySelector('.inherit-section').open = true;
   renderBuildBoard(recs);
@@ -700,8 +701,32 @@ document.addEventListener('toggle', event=>{
   }
 },true);
 
+let mindComposing = false;
+document.addEventListener('compositionstart', event => {
+  if (event.target.id === 'mindSearch') mindComposing = true;
+});
+document.addEventListener('compositionend', event => {
+  if (event.target.id !== 'mindSearch') return;
+  mindComposing = false;
+  mindQuery = event.target.value;
+  renderMindGuide();
+  document.getElementById('mindSearch')?.focus();
+});
+document.addEventListener('input', event => {
+  if (event.target.id !== 'mindSearch' || mindComposing || event.isComposing) return;
+  mindQuery = event.target.value;
+  renderMindGuide();
+  const search = document.getElementById('mindSearch');
+  search?.focus();
+  search?.setSelectionRange(mindQuery.length, mindQuery.length);
+});
+
 document.addEventListener('change', event => {
   const action=event.target.dataset?.action;
+  if (action==='mind-character') {
+    if (event.target.value !== 'all' && !CHARACTERS.some(character=>character.id===event.target.value)) return;
+    mindCharacterFilter=event.target.value;renderMindGuide();return;
+  }
   if(action==='legacy-body') {commit(R.setLegacyBody(state,Number(event.target.dataset.value),event.target.value));return;}
   if (['legacy-check','legacy-unlock','legacy-skill'].includes(action)) {
     const goal=CompassLegacy.normalize(state.legacyBuild,currentCharacter);
@@ -750,6 +775,44 @@ document.addEventListener('click', async event => {
   const target = event.target.closest('[data-action]');
   if (!target) return;
   const { action, value } = target.dataset;
+  if (action==='show-view') { showView(value);return; }
+  if (action==='mind-tab') {
+    if (!['routes','codex','crystals'].includes(value)) return;
+    mindTab=value;mindQuery='';renderMindGuide();return;
+  }
+  if (action==='mind-pool') {
+    if (value!=='all'&&!MIND.pools.some(pool=>pool.id===value)) return;
+    mindPool=value;mindCategory='all';renderMindGuide();return;
+  }
+  if (action==='mind-category') {
+    if (value!=='all'&&!MIND.categories.some(category=>category.id===value)) return;
+    mindCategory=value;renderMindGuide();return;
+  }
+  if (action==='mind-crystal-group') {
+    if (!MIND.crystalGroups.some(group=>group.id===value)) return;
+    mindCrystalGroup=value;renderMindGuide();return;
+  }
+  if (action==='mind-reset-filters') { resetMindFilters();return; }
+  if (action==='mind-use-character') {
+    if (!CHARACTERS.some(character=>character.id===value)) return;
+    mindCharacterFilter=value;
+    if (currentCharacter!==value) selectCharacter(value); else renderMindGuide();
+    return;
+  }
+  if (action==='mind-goal') {
+    const build=CompassLegacy.find(value);if(!build)return;
+    mindCharacterFilter=build.character;setLegacyGoal(value);return;
+  }
+  if (action==='mind-strategies') {
+    if (!CHARACTERS.some(character=>character.id===value)) return;
+    if (currentCharacter!==value) {
+      currentCharacter=value;state.legacyBuild=null;
+      state.legacyBodies=state.legacyBodies.map(source=>source===currentCharacter?null:source);
+    }
+    state.recommendMode='character';state.characterBuild=null;state.fiveDualGoal=null;commit();
+    showView('simulator');document.getElementById('plannerSettings').open=true;
+    requestAnimationFrame(()=>document.getElementById('character-strategy-routes')?.scrollIntoView({block:'start'}));return;
+  }
   if (action==='legacy-filter') {
     if (!CompassLegacy.filters.some(x=>x[0]===value)) return;
     legacyFilter=value;renderAll();return;
@@ -887,6 +950,16 @@ document.getElementById('slotTabs').addEventListener('keydown', event => {
     (index + (event.key === 'ArrowRight' ? 1 : 4)) % 5].id);
   document.getElementById('tab-' + state.slot).focus();
 });
+document.querySelector('.mind-tabs').addEventListener('keydown', event => {
+  if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+  event.preventDefault();
+  const tabs = ['routes', 'codex', 'crystals'];
+  const index = tabs.indexOf(mindTab);
+  mindTab = tabs[event.key === 'Home' ? 0 : event.key === 'End' ? 2 :
+    (index + (event.key === 'ArrowRight' ? 1 : 2)) % 3];
+  mindQuery = '';renderMindGuide();
+  document.querySelector(`.mind-tab[data-value="${mindTab}"]`)?.focus();
+});
 
 function exportData() {
   document.getElementById('exportCode').textContent = JSON.stringify(R.serialize(state), null, 2);
@@ -974,6 +1047,12 @@ if (CHARACTERS.some(c => c.id === linkedCharacter)) {
   if(currentCharacter!==linkedCharacter) {state.legacyBuild=null;state.characterBuild=null;}
   currentCharacter = linkedCharacter;
   state.legacyBodies=state.legacyBodies.map(id=>id===currentCharacter?null:id);
+}
+const linkedView = new URLSearchParams(location.search);
+if (linkedView.get('view') === 'mind') {
+  const tab = linkedView.get('tab');
+  if (['routes', 'codex', 'crystals'].includes(tab)) mindTab = tab;
+  showView('mind');
 }
 state.character=currentCharacter;sessionHistory.reset(R.serialize(state));
 new ResizeObserver(entries=>{

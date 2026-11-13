@@ -3,9 +3,9 @@ header { display:flex; flex-wrap:wrap; align-items:center; justify-content:space
 header::after { display:none; }
 header h1 .page-title { padding:3px 14px; background:color-mix(in srgb,var(--accent) 10%,var(--panel)); border-left:3px solid var(--accent); clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%); }
 header .game-nav { display:flex; flex-wrap:wrap; gap:4px; padding:0; border:0; background:none; overflow:visible; }
-.game-nav a { min-height:44px; display:inline-flex; align-items:center; padding:8px 16px; color:var(--muted); border:1px solid var(--line); text-decoration:none; font-size:.8rem; background:var(--panel); border-radius:2px; }
-.game-nav a[aria-current] { color:var(--text); border-bottom:3px solid var(--accent); background:var(--panel-3); }
-.game-nav a:hover { color:var(--text); border-color:var(--text); }
+.game-nav a,.game-nav button { min-height:44px; display:inline-flex; align-items:center; padding:8px 16px; color:var(--muted); border:1px solid var(--line); text-decoration:none; font-family:inherit; font-size:.8rem; background:var(--panel); border-radius:2px; cursor:pointer; }
+.game-nav a[aria-current],.game-nav button[aria-current] { color:var(--text); border-bottom:3px solid var(--accent); background:var(--panel-3); }
+.game-nav a:hover,.game-nav button:hover { color:var(--text); border-color:var(--text); }
 #recControls.rec-strip { margin:12px 0; padding:14px 0; background:none; border:0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); border-radius:0; }
 #recStrip.rec-strip { padding:0; border:0; background:none; }
 #recControls .mode-segment { gap:4px; }
@@ -67,7 +67,7 @@ header .game-nav { display:flex; flex-wrap:wrap; gap:4px; padding:0; border:0; b
 @media(max-width:600px) {
   header { gap:8px; }
   header .game-nav { width:100%; }
-  .game-nav a { flex:1; justify-content:center; }
+  .game-nav a,.game-nav button { flex:1; justify-content:center; }
   #recControls .mode-segment .mode-btn { padding:8px 12px; }
   .build-list-heading .btn { font-size:.75rem; }
   .inherit-preview { margin-left:6px; gap:3px; }

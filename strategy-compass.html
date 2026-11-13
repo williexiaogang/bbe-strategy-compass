@@ -934,11 +934,12 @@
 <link rel="stylesheet" href="strategy-hud.css?v=20261108-audit-fixes">
 <link rel="stylesheet" href="strategy-art.css?v=20261108-audit-fixes">
 <link rel="stylesheet" href="strategy-legacy.css?v=20261108-audit-fixes">
+<link rel="stylesheet" href="strategy-mind.css?v=20261113-mind-routes">
 </head>
 <body>
 <header>
   <h1><span class="page-brand">蒼翼混沌效應</span> <span class="page-title">策略羅盤</span></h1>
-  <nav class="game-nav" aria-label="工具導覽"><a href="strategy-compass.html" aria-current="page">配裝模擬</a><a href="character-skills.html">角色技能樹</a></nav>
+  <nav class="game-nav" aria-label="工具導覽"><button type="button" data-action="show-view" data-value="simulator" aria-current="page">配裝模擬</button><button type="button" data-action="show-view" data-value="mind">意識路線</button><a href="character-skills.html">角色技能樹</a></nav>
 
 </header>
 
@@ -979,6 +980,15 @@
 
     <details id="rules-help" class="rules-note"><summary>規則說明</summary>
       <p>進階需前置；紅策取得與傳承啟用需在遊戲中確認。I 階傳承直接填入裝配，II 階需 I 階，III 階需 I、II 階齊備後自動生效。</p></details>
+  </section>
+  <section id="mind" class="section" hidden aria-labelledby="mindTitle">
+    <div class="mind-heading"><div><h2 id="mindTitle">意識路線</h2><p>把角色機制、雙傳承、意識增幅與特殊房選擇排成可執行的成型順序；未知換算只保留描述。</p></div><span>資料整理：2026-11-13 · Steam／PC 優先</span></div>
+    <div class="tabs tabs-box mind-tabs" role="tablist" aria-label="意識資料分頁">
+      <button type="button" role="tab" class="tab mind-tab tab-active" data-action="mind-tab" data-value="routes" aria-selected="true" aria-controls="mindContent">角色線路</button>
+      <button type="button" role="tab" class="tab mind-tab" data-action="mind-tab" data-value="codex" aria-selected="false" aria-controls="mindContent" tabindex="-1">局內圖鑑</button>
+      <button type="button" role="tab" class="tab mind-tab" data-action="mind-tab" data-value="crystals" aria-selected="false" aria-controls="mindContent" tabindex="-1">意識結晶</button>
+    </div>
+    <div id="mindContent" role="tabpanel" aria-live="polite"></div>
   </section>
 </main>
 
@@ -1078,7 +1088,7 @@
 </footer>
 
 <script src="tactics-descriptions.js?v=20261108-audit-fixes"></script>
-<script src="player-catalogue.js?v=20261108-audit-fixes"></script>
+<script src="player-catalogue.js?v=20261113-mind-routes"></script>
 <script src="strategy-data.js?v=20261108-inherit-offers"></script>
 <script src="strategy-art.js?v=20261108-audit-fixes"></script>
 <script src="strategy-five-duals.js?v=20261108-audit-fixes"></script>
@@ -1097,6 +1107,8 @@
 <script src="strategy-session.js?v=20261108-audit-fixes"></script>
 <script src="strategy-recommendations.js?v=20261108-inherit-offers"></script>
 <script src="strategy-routes.js?v=20261111-top-damage"></script>
-<script src="strategy-app.js?v=20261111-top-damage"></script>
+<script src="strategy-mind-data.js?v=20261113-mind-routes"></script>
+<script src="strategy-mind.js?v=20261113-mind-routes"></script>
+<script src="strategy-app.js?v=20261113-mind-routes"></script>
 </body>
 </html>
